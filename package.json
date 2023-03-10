@@ -1,0 +1,24 @@
+{
+  "name": "skohub-reconcile-publish",
+  "version": "0.0.1",
+  "description": "Publish vocabularies to a SkoHub Reconcile service.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "skohub",
+    "skos",
+    "reconciliation"
+  ],
+  "author": "Steffen Rörtgen <kontakt@steffen-roertgen.de>",
+  "license": "MIT",
+  "dependencies": {
+    "@elastic/elasticsearch": "^8.6.0",
+    "@frogcat/ttl2jsonld": "^0.0.9",
+    "dotenv": "^16.0.3",
+    "elastic-builder": "^2.18.0",
+    "glob": "^9.2.1",
+    "jsonld": "^8.1.1"
+  }
+}
