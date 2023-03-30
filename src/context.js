@@ -1,4 +1,4 @@
-const jsonld = {
+export const context = {
 	"@context": {
 	  "@version": 1.1,
 	  "id": "@id",
@@ -50,5 +50,3 @@ const jsonld = {
 	  "exactMatch": { "@container": "@set" }
 	}
 }
-
-module.exports = { jsonld }
