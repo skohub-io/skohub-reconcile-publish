@@ -6,3 +6,6 @@
 
 # Except this file
 !.gitignore
+!index.html
+!processing.html
+!log/

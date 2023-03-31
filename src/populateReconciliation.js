@@ -1,28 +1,17 @@
 import fs from "fs";
 import path from "path";
-import { globSync } from "glob";
 import ttl2jsonld from "@frogcat/ttl2jsonld";
 import elasticsearch from "@elastic/elasticsearch";
 import esb from "elastic-builder";
 import jsonld from "jsonld";
 import { context } from "./context.js";
-import * as dotenv from "dotenv";
-import { randomUUID } from "crypto";
 
-dotenv.config();
-
-const esIndex = process.env.ES_INDEX;
+const esIndex = "skohub-reconcile";
 
 const setupEsClient = () => {
-  if (process.env.ES_USER && process.env.ES_PASS) {
-    return new elasticsearch.Client({
-      node: `${process.env.ES_PROTO}://${process.env.ES_USER}:${process.env.ES_PASS}@${process.env.ES_HOST}:${process.env.ES_PORT}`,
-    });
-  } else {
-    return new elasticsearch.Client({
-      node: `${process.env.ES_PROTO}://${process.env.ES_HOST}:${process.env.ES_PORT}`,
-    });
-  }
+  return new elasticsearch.Client({
+    node: `http://localhost:9200`,
+  });
 };
 
 const esClient = setupEsClient();
@@ -30,14 +19,15 @@ const esClient = setupEsClient();
 async function collectData(filePath, log) {
   var data = [];
   const account = path.basename(path.dirname(filePath));
+  log.log.push(`> Read and parse ${account}/${path.basename(filePath)} ...`);
   console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
   if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
     console.log(
       `> Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`
     );
   }
-  const ttlString = fs.readFileSync(filePath).toString();
-  const j = await buildJSON(ttlString, account);
+  const ttlString = await fs.readFileSync(filePath).toString();
+  const j = await buildJSON(ttlString.toString(), account);
   if (!/[a-zA-Z0-9]/.test(j.dataset.slice(0, 1))) {
     console.log(
       `> Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`
@@ -66,9 +56,9 @@ async function buildJSON(ttlString, account) {
     };
     if (node.type === "ConceptScheme") {
       dataset = node.id;
-      if (typeof(node.preferredNamespaceUri) === "string") {
-        const id = node.preferredNamespaceUri
-        node.preferredNamespaceUri = {id};
+      if (typeof node.preferredNamespaceUri === "string") {
+        const id = node.preferredNamespaceUri;
+        node.preferredNamespaceUri = { id };
       }
     } else if (node.type === "Concept") {
       dataset = node?.inScheme?.[0]?.id ?? node.topConceptOf[0].id;
@@ -138,14 +128,10 @@ function writeLog(log) {
   fs.writeFileSync(`public/log/${log.id}.json`, JSON.stringify(log));
 }
 
-export default async function (filePath) {
-  const log = {
-    id: randomUUID(),
-    status: "running",
-  };
-  writeLog(log);
+async function process(filePath, log) {
   const data = await collectData(filePath, log);
-  data.forEach(async (v) => {
+  console.log("data there");
+  for await (const v of data) {
     try {
       const response = await sendData(v.entries);
       if (response.errors) {
@@ -157,6 +143,8 @@ export default async function (filePath) {
         console.log(
           `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
         );
+        log.status = "success";
+        writeLog(log);
       }
     } catch (error) {
       console.error(
@@ -164,5 +152,17 @@ export default async function (filePath) {
         error
       );
     }
-  });
+  }
+}
+
+export default function (filePath, id) {
+  const log = {
+    id: id,
+    status: "processing",
+    log: [],
+  };
+  writeLog(log);
+  console.log("collecting data");
+  process(filePath, log);
+  return 
 }

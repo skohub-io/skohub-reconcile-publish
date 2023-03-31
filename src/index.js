@@ -2,6 +2,7 @@ import express from "express";
 import multer from "multer";
 import fs from "fs";
 import populateReconciliation from "./populateReconciliation.js";
+import { randomUUID } from "crypto";
 
 const app = express();
 
@@ -26,10 +27,15 @@ app.get("/", (req, res) => {
   res.sendFile("index.html");
 });
 
-app.post("/upload", upload.single("uploaded_file"), function (req, res) {
+app.get("/processing", (req, res) => {
+  res.sendFile("processing.html", {root: "./public"});
+});
+
+app.post("/upload", upload.single("uploaded_file"), async function (req, res) {
   const filePath = req.file.path;
-  populateReconciliation(filePath);
-  res.redirect("processing.html")
+  const id = randomUUID();
+  res.redirect("/processing" + "?id=" + id);
+  populateReconciliation(filePath, id);
   // res.json({ file: req.file });
 });
 
