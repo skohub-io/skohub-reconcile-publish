@@ -1,13 +1,159 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, shrink-to-fit=no">
+  <title>SkoHub</title>
+  <meta name="description"
+    content="SkoHub seeks to implement a novel approach in syndicating content on the web by combining current web standards for sending notifications and subscribing to feeds with knowledge organization systems (KOS, sometimes also called “controlled vocabularies”)">
+  <link rel="shortcut icon" href="https://skohub-io.github.io/skohub.io/img/skohub-icon.png" type="image/x-icon">
+  <link href="./css/style.css" rel="stylesheet" media="all">
+</head>
 
 <body>
-  <form action="/upload" enctype="multipart/form-data" method="post">
-    <div class="form-group">
-      <input type="text" name="account">
-      <input type="file" class="form-control-file" name="uploaded_file">
-      <input type="submit" value="Get me the stats!" class="btn btn-default">
+  <div class="content">
+    <!-- header start -->
+    <header role="banner">
+      <div class="wrapper">
+        <div class="header-content">
+          <span class="portal-logo"><a href="index.html"><img
+                src="https://skohub-io.github.io/skohub.io/img/skohub-logo-color.svg" />SkoHub</a></span>
+        </div>
+      </div>
+    </header>
+    <!-- header end -->
+
+    <!-- main start -->
+    <main role="main">
+      <section class="introduction">
+        <h1>Unleash the full potential of controlled vocabularies in reconciliation</h1>
+      </section>
+
+      <section class="keyvisual-content">
+        <div class="upload">
+          <form action="/upload" enctype="multipart/form-data" method="post">
+            <div class="form-group">
+              <label for="account">Account for Dataset
+              </label>
+              <input type="text" id="account" name="account" />
+              <label for="file">
+                Please select a file to upload (.ttl)
+              </label>
+              <input type="file" id="file_upload" class="form-control-file" name="uploaded_file" />
+              <input type="hidden" name="id" id="id" value="" />
+              <input disabled type="submit" value="Upload File to Reconcile Service!" class="btn btn-default" />
+            </div>
+            <div id="spinner" class="lds-ring">
+              <div></div>
+              <div></div>
+              <div></div>
+              <div></div>
+            </div>
+            <div id="checkmark" class="hidden">
+              <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+              </svg>
+            </div>
+          </form>
+          <div id="result"></div>
+        </div>
+      </section>
+
+    </main>
+    <!-- main end -->
+  </div>
+  <!-- footer start -->
+  <footer class="footer" role="contentinfo">
+    <div class="wrapper">
+      <div class="footer">
+        <section class="footer-columnset">
+          <article>
+            <span class="sponsor-logo"><a target="_blank" href="https://www.hbz-nrw.de"><img
+                  src="https://skohub-io.github.io/skohub.io/img/logo-hbz-white.svg" width="120px"></a></span>
+          </article>
+          <article>
+            <ul class="footer-nav">
+              <li><a target="_blank" href="https://www.hbz-nrw.de/impressum">Imprint</a></li>
+              <li><a href="mailto:skohub@hbz-nrw.de">skohub@hbz-nrw.de</a></li>
+              <li><a target="_blank" href="https://socialhub.activitypub.rocks/c/software/skohub">Discourse</a></li>
+              <li><a target="_blank" href="https://github.com/skohub-io/skohub.io/issues">Issues</a></li>
+            </ul>
+          </article>
+          <article>
+            <span class="portal-footer-logo"><a href="index.html"><img
+                  src="https://skohub-io.github.io/skohub.io/img/skohub-signet-color.svg" width="40px"></a></span>
+          </article>
+        </section>
+      </div>
     </div>
-  </form>
+  </footer>
+
 </body>
+
+<script>
+  const account = document.querySelector("#account")
+  const file_upload = document.querySelector("#file_upload")
+  const id = document.querySelector("#id")
+  const submit = document.querySelector("input[type=submit]")
+  const spinner = document.querySelector("#spinner")
+  const checkmark = document.querySelector("#checkmark")
+  const result = document.querySelector("#result")
+
+  const buildReconcileUrl = (account, dataset) => `http://localhost:3000/_reconcile?language=en&account=${account}&dataset=${dataset}`
+
+  id.value = crypto.randomUUID()
+
+  function disableSubmit() {
+    if (account.value.length > 0 && file_upload.value.length > 0) {
+      submit.removeAttribute("disabled")
+    } else {
+      submit.setAttribute("disabled", "disabled")
+    }
+  }
+
+  account.addEventListener("input", (e) => {
+    disableSubmit()
+  })
+
+  file_upload.addEventListener("input", (e) => {
+    disableSubmit()
+  })
+
+  submit.addEventListener("click", (e) => {
+    spinner.style.display = "inline-block"
+    getData()
+  })
+
+  const getData = async () => {
+    try {
+      const response = await fetch(`./log/${id.value}.json`)
+      const data = await response.json()
+      renderData(data)
+    } catch (error) {
+      setTimeout(getData, 1000)
+    }
+  }
+
+  const renderData = (data) => {
+    status.innerHTML = data.status
+
+    if (data.status === "processing") {
+      setTimeout(getData, 1000)
+    } else {
+      spinner.style.display = "none"
+      checkmark.classList.remove("hidden")
+      reconcileUrl = buildReconcileUrl(data.account, data.dataset)
+      reconcileUrlLink = document.createElement("a")
+      reconcileUrlLink.setAttribute("href", reconcileUrl)
+      reconcileUrlLink.setAttribute("target", "_blank")
+      reconcileUrlLink.innerHTML = reconcileUrl
+      result.appendChild(reconcileUrlLink)
+    }
+  }
+
+</script>
 
 </html>

@@ -19,7 +19,6 @@ const esClient = setupEsClient();
 async function collectData(filePath, log) {
   var data = [];
   const account = path.basename(path.dirname(filePath));
-  log.log.push(`> Read and parse ${account}/${path.basename(filePath)} ...`);
   console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
   if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
     console.log(
@@ -129,30 +128,35 @@ function writeLog(log) {
 }
 
 async function process(filePath, log) {
-  const data = await collectData(filePath, log);
-  console.log("data there");
-  for await (const v of data) {
-    try {
-      const response = await sendData(v.entries);
-      if (response.errors) {
-        console.log(
-          `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-          response
+    const data = await collectData(filePath, log);
+    for await (const v of data) {
+      try {
+        const response = await sendData(v.entries);
+        if (response.errors) {
+          console.log(
+            `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
+            response
+          );
+        } else {
+          console.log(
+            `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
+          );
+          // TODO improve this
+          log.account = v.account;
+          log.dataset = v.dataset;
+          log.status = "success";
+          writeLog(log);
+        }
+      } catch (error) {
+        console.error(
+          `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
+          error
         );
-      } else {
-        console.log(
-          `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
-        );
-        log.status = "success";
-        writeLog(log);
+        throw new Error("did not work");
       }
-    } catch (error) {
-      console.error(
-        `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
-        error
-      );
     }
-  }
+    return
+
 }
 
 export default function (filePath, id) {
@@ -162,7 +166,12 @@ export default function (filePath, id) {
     log: [],
   };
   writeLog(log);
-  console.log("collecting data");
-  process(filePath, log);
-  return 
+  return new Promise((resolve, reject) => {
+    try {
+      resolve(process(filePath, log))
+    } catch (error) {
+      console.log("rejected");
+      reject(error)
+    }
+  })
 }

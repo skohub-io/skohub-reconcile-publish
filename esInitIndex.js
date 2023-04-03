@@ -1,13 +1,12 @@
 import fs from 'fs'
 import path from 'path'
 import { URL } from 'url'
-import config from './config.js'
 import esConnect from './esConnect.js'
 
 const __dirname = new URL('.', import.meta.url).pathname
 
 const esClient = esConnect.esClient
-const index = config.es_index
+const index = "skohub-reconcile"
 const schema = JSON.parse(fs.readFileSync(path.resolve(__dirname, 'schema/esSchema.json')))
 
 
