@@ -5,6 +5,7 @@ import elasticsearch from "@elastic/elasticsearch";
 import esb from "elastic-builder";
 import jsonld from "jsonld";
 import { context } from "./context.js";
+import crypto from "crypto";
 
 const esIndex = "skohub-reconcile";
 
@@ -32,6 +33,10 @@ async function collectData(filePath, log) {
       `> Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`
     );
   }
+  log.status = "processing";
+  log.account = account;
+  log.dataset = j.dataset;
+  writeLog(log);
   data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
   return data;
 }
@@ -88,10 +93,16 @@ async function deleteData(account, dataset) {
   });
 }
 
+function hashID(id) {
+  const hash = crypto.createHash("sha256");
+  hash.update(id);
+  return hash.digest("hex");
+}
+
 async function sendData(entries) {
   const operations = entries.flatMap((doc) => [
-    { index: { _index: "skohub-reconcile" } },
-    doc,
+    { index: { _index: "skohub-reconcile", _id: hashID(doc.id)  } },
+    {...doc},
   ]);
   const bulkResponse = await esClient.bulk({
     refresh: true,
