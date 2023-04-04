@@ -101,7 +101,7 @@ function hashID(id) {
 
 async function sendData(entries) {
   const operations = entries.flatMap((doc) => [
-    { index: { _index: "skohub-reconcile", _id: hashID(doc.id)  } },
+    { index: { _index: "skohub-reconcile", _id: hashID(doc.id + doc.dataset + doc.account)  } },
     {...doc},
   ]);
   const bulkResponse = await esClient.bulk({
