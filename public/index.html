@@ -32,7 +32,7 @@
       </section>
 
       <section class="keyvisual-content">
-        <div class="upload">
+        <div class="uploadForm">
           <form action="/upload" enctype="multipart/form-data" method="post">
             <div class="form-group">
               <label for="account">Account for Dataset
@@ -45,6 +45,9 @@
               <input type="hidden" name="id" id="id" value="" />
               <input disabled type="submit" value="Upload File to Reconcile Service!" class="btn btn-default" />
             </div>
+          </form>
+        </div>
+          <div id="result">
             <div id="spinner" class="lds-ring">
               <div></div>
               <div></div>
@@ -57,9 +60,7 @@
                 <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
               </svg>
             </div>
-          </form>
-          <div id="result"></div>
-        </div>
+          </div>
       </section>
 
     </main>
@@ -94,6 +95,7 @@
 </body>
 
 <script>
+  const uploadForm = document.querySelector(".uploadForm")
   const account = document.querySelector("#account")
   const file_upload = document.querySelector("#file_upload")
   const id = document.querySelector("#id")
@@ -101,6 +103,9 @@
   const spinner = document.querySelector("#spinner")
   const checkmark = document.querySelector("#checkmark")
   const result = document.querySelector("#result")
+
+  const url = new URL(window.location.href)
+  const idParam = url.searchParams.get("id")
 
   const buildReconcileUrl = (account, dataset) => `http://localhost:3000/_reconcile?language=en&account=${account}&dataset=${dataset}`
 
@@ -138,7 +143,9 @@
   }
 
   const renderData = (data) => {
-    status.innerHTML = data.status
+
+    uploadForm.style.display = "none"
+
 
     if (data.status === "processing") {
       setTimeout(getData, 1000)
@@ -151,7 +158,23 @@
       reconcileUrlLink.setAttribute("target", "_blank")
       reconcileUrlLink.innerHTML = reconcileUrl
       result.appendChild(reconcileUrlLink)
+
+      // add a button to return to root page saying "Add another dataset"
+      const button = document.createElement("button")
+      button.setAttribute("class", "btn")
+      button.innerHTML = "Add another dataset"
+      button.style.display = "block"
+      button.addEventListener("click", () => {
+        window.location.href = "/"
+      })
+      result.appendChild(button)
+
     }
+  }
+
+  if (idParam) {
+    id.value = idParam
+    getData()
   }
 
 </script>

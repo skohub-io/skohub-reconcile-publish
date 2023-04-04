@@ -36,6 +36,7 @@ app.post("/upload", upload.single("uploaded_file"), async function (req, res, ne
   const id = req.body.id
   try {
     await populateReconciliation(filePath, id)
+    res.redirect("/" + "?id=" + id)
   } catch (error) {
     console.log(error);
     next(error)
