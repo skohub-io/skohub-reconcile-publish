@@ -2,7 +2,7 @@ import express from "express";
 import multer from "multer";
 import fs from "fs";
 import populateReconciliation from "./populateReconciliation.js";
-import { randomUUID } from "crypto";
+import { config } from "./config.js";
 
 const app = express();
 
@@ -49,6 +49,6 @@ app.use((error, req, res, next) => {
   res.redirect("/")
 })
 
-app.listen(3030, function () {
-  console.log("App listening on port 3030!");
+app.listen(config.app_port, function () {
+  console.log(`App listening on port ${config.app_port}!`);
 });

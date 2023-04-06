@@ -1,18 +1,25 @@
 import fs from "fs";
 import path from "path";
 import ttl2jsonld from "@frogcat/ttl2jsonld";
-import elasticsearch from "@elastic/elasticsearch";
+import { Client } from "@elastic/elasticsearch";
 import esb from "elastic-builder";
 import jsonld from "jsonld";
 import { context } from "./context.js";
 import crypto from "crypto";
+import { config } from "./config.js";
 
-const esIndex = "skohub-reconcile";
+const esIndex = config.es_index;
 
 const setupEsClient = () => {
-  return new elasticsearch.Client({
-    node: `http://localhost:9200`,
-  });
+  if (config.es_user && config.es_pass) {
+    return new Client({
+      node: `${config.es_proto}://${config.es_user}:${config.es_pass}@${config.es_host}:${config.es_port}`,
+    });
+  } else {
+    return new Client({
+      node: `${config.es_proto}://${config.es_host}:${config.es_port}`,
+    });
+  }
 };
 
 const esClient = setupEsClient();
@@ -101,8 +108,13 @@ function hashID(id) {
 
 async function sendData(entries) {
   const operations = entries.flatMap((doc) => [
-    { index: { _index: "skohub-reconcile", _id: hashID(doc.id + doc.dataset + doc.account)  } },
-    {...doc},
+    {
+      index: {
+        _index: "skohub-reconcile",
+        _id: hashID(doc.id + doc.dataset + doc.account),
+      },
+    },
+    { ...doc },
   ]);
   const bulkResponse = await esClient.bulk({
     refresh: true,
@@ -139,35 +151,34 @@ function writeLog(log) {
 }
 
 async function process(filePath, log) {
-    const data = await collectData(filePath, log);
-    for await (const v of data) {
-      try {
-        const response = await sendData(v.entries);
-        if (response.errors) {
-          console.log(
-            `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-            response
-          );
-        } else {
-          console.log(
-            `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
-          );
-          // TODO improve this
-          log.account = v.account;
-          log.dataset = v.dataset;
-          log.status = "success";
-          writeLog(log);
-        }
-      } catch (error) {
-        console.error(
-          `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
-          error
+  const data = await collectData(filePath, log);
+  for await (const v of data) {
+    try {
+      const response = await sendData(v.entries);
+      if (response.errors) {
+        console.log(
+          `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
+          response
         );
-        throw new Error("did not work");
+      } else {
+        console.log(
+          `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
+        );
+        // TODO improve this
+        log.account = v.account;
+        log.dataset = v.dataset;
+        log.status = "success";
+        writeLog(log);
       }
+    } catch (error) {
+      console.error(
+        `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
+        error
+      );
+      throw new Error("did not work");
     }
-    return
-
+  }
+  return;
 }
 
 export default function (filePath, id) {
@@ -179,10 +190,10 @@ export default function (filePath, id) {
   writeLog(log);
   return new Promise((resolve, reject) => {
     try {
-      resolve(process(filePath, log))
+      resolve(process(filePath, log));
     } catch (error) {
       console.log("rejected");
-      reject(error)
+      reject(error);
     }
-  })
+  });
 }
