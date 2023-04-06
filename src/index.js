@@ -45,6 +45,7 @@ app.post("/upload", upload.single("uploaded_file"), async function (req, res, ne
 
 app.use((error, req, res, next) => {
   console.log("Error Handling Middleware called")
+  console.error(error)
   console.log('Path: ', req.path)
   res.redirect("/")
 })
