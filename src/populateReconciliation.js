@@ -1,12 +1,12 @@
-import fs from "fs";
-import path from "path";
-import ttl2jsonld from "@frogcat/ttl2jsonld";
 import { Client } from "@elastic/elasticsearch";
-import esb from "elastic-builder";
-import jsonld from "jsonld";
-import { context } from "./context.js";
+import ttl2jsonld from "@frogcat/ttl2jsonld";
 import crypto from "crypto";
+import esb from "elastic-builder";
+import fs from "fs";
+import jsonld from "jsonld";
+import path from "path";
 import { config } from "./config.js";
+import { context } from "./context.js";
 
 const esIndex = config.es_index;
 
