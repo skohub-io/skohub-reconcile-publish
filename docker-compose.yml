@@ -1,0 +1,12 @@
+version: "2.2"
+
+services:
+  reconcile-publish:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - ${APP_PORT}:3000
+    volumes:
+      - .env:/app/.env
+      - ./uploads:/app/uploads

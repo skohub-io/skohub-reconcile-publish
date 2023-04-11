@@ -50,6 +50,6 @@ app.use((error, req, res, next) => {
   res.redirect("/")
 })
 
-app.listen(config.app_port, function () {
+app.listen(3000, function () {
   console.log(`App listening on port ${config.app_port}!`);
 });
