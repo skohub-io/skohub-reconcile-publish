@@ -1,12 +1,10 @@
 import { Client } from "@elastic/elasticsearch";
-import ttl2jsonld from "@frogcat/ttl2jsonld";
 import crypto from "crypto";
 import esb from "elastic-builder";
 import fs from "fs";
-import jsonld from "jsonld";
 import path from "path";
 import { config } from "./config.js";
-import { context } from "./context.js";
+import { buildJSON } from "./buildJSON.js";
 
 const esIndex = config.es_index;
 
@@ -46,40 +44,6 @@ async function collectData(filePath, log) {
   writeLog(log);
   data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
   return data;
-}
-
-async function buildJSON(ttlString, account) {
-  const doc = ttl2jsonld.parse(ttlString);
-  const expanded = await jsonld.expand(doc);
-  const compacted = await jsonld.compact(expanded, context);
-  // TODO get all available languages and stor them as attribute for Concept Scheme
-  var entries = [];
-  var dataset = "";
-
-  compacted["@graph"].forEach((graph, _) => {
-    const { ...properties } = graph;
-    const type = Array.isArray(properties.type)
-      ? properties.type.find((t) => ["Concept", "ConceptScheme"])
-      : properties.type;
-    const node = {
-      ...properties,
-      type,
-    };
-    if (node.type === "ConceptScheme") {
-      dataset = node.id;
-      if (typeof node.preferredNamespaceUri === "string") {
-        const id = node.preferredNamespaceUri;
-        node.preferredNamespaceUri = { id };
-      }
-    } else if (node.type === "Concept") {
-      dataset = node?.inScheme?.[0]?.id ?? node.topConceptOf[0].id;
-    }
-    node["dataset"] = dataset;
-    node["account"] = account;
-
-    entries.push(node);
-  });
-  return { account: account, dataset: dataset, entries: entries };
 }
 
 async function deleteData(account, dataset) {
