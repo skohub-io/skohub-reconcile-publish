@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
-import populateReconciliation from "./populateReconciliation.js";
+import { populateReconciliation } from "./populateReconciliation.js";
 import { config } from "./config.js";
 
 const app = express();

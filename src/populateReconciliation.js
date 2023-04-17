@@ -118,6 +118,14 @@ async function process(filePath, log) {
   const data = await collectData(filePath, log);
   for await (const v of data) {
     try {
+      // delete old data
+      const responseDeleted = await deleteData(v.account, v.dataset);
+      // if failures occured, log them
+      if (responseDeleted.failures.length > 0) {
+        console.log(
+          `> Warning: DeleteData ${v.account}/${v.dataset} had failures. Better check response:\n`,
+          responseDeleted
+        )}
       const response = await sendData(v.entries);
       if (response.errors) {
         console.log(
@@ -145,7 +153,7 @@ async function process(filePath, log) {
   return;
 }
 
-export default function (filePath, id) {
+export const populateReconciliation = (filePath, id) => {
   const log = {
     id: id,
     status: "processing",
