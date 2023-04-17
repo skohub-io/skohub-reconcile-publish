@@ -47,14 +47,15 @@ async function collectData(filePath, log) {
 }
 
 async function deleteData(account, dataset) {
+  console.log(`Delete data for account: ${account} and dataset: ${dataset} ...`)
   const requestBody = esb
     .requestBodySearch()
     .query(
       esb
         .boolQuery()
         .must([
-          ...(dataset && [esb.termQuery("dataset.keyword", dataset)]),
-          ...(account && [esb.termQuery("account.keyword", account)]),
+          ...(dataset && [esb.termQuery("dataset", dataset)]),
+          ...(account && [esb.termQuery("account", account)]),
         ])
     );
   return esClient.deleteByQuery({
@@ -126,6 +127,7 @@ async function process(filePath, log) {
           `> Warning: DeleteData ${v.account}/${v.dataset} had failures. Better check response:\n`,
           responseDeleted
         )}
+      console.log(`> ${v.account}/${v.dataset}: Successfully deleted ${responseDeleted.deleted} documents from ES index.`)
       const response = await sendData(v.entries);
       if (response.errors) {
         console.log(
