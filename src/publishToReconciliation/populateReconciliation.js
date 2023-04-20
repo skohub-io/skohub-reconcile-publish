@@ -129,6 +129,7 @@ async function process(filePath, log) {
         log.account = v.account;
         log.dataset = v.dataset;
         log.status = "success";
+        log.reconcile_service_url = config.reconcile_service_url;
         writeLog(log);
       }
     } catch (error) {
