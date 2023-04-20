@@ -2,7 +2,7 @@ import crypto from "crypto";
 import esb from "elastic-builder";
 import fs from "fs";
 import path from "path";
-import { buildJSON } from "../buildJSON.js";
+import { buildJSON } from "./buildJSON.js";
 import { esClient } from "../elastic/connect.js";
 import { writeLog } from "./writeLog.js";
 import { config } from "../config.js";
