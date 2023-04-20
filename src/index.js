@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
-import { populateReconciliation } from "./publishToReconciliatoin/populateReconciliation.js";
+import { populateReconciliation } from "./publishToReconciliation/populateReconciliation.js";
 import { config } from "./config.js";
 
 const app = express();
@@ -69,5 +69,5 @@ app.use((error, req, res, next) => {
 });
 
 app.listen(config.app_port, function () {
-  console.log(`App listening on port ${config.app_port}!`);
+  console.log(`App listening on port ${config.app_port_exposed}!`);
 });
