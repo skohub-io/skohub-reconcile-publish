@@ -12,7 +12,9 @@ To do so, you have to provide the following parameters:
 - account: the account name for the SkoHub Reconcile Service
 - id: this is used for logging out the upload status and should be unique (try `uuidgen` for a unique id)
 
-`curl -F uploaded_file=@./uploads/dini-ag-kim/hcrt.ttl -F account=test -F id=123 http://localhost:3030/upload`
+Example:
+
+    curl -F uploaded_file=@./uploads/dini-ag-kim/hcrt.ttl -F account=test -F id=123 http://localhost:3030/upload
 
 ## Setup
 
@@ -35,14 +37,14 @@ The service uses an external network to communicate with the [SkoHub Reconcile](
 Before you start the service make sure the network `reconcile-backend` exists.
 You can create it with:
 
-    $ docker network create reconcile-backend
+    docker network create reconcile-backend
 
 ### Run the Service
 
 
 Then, you can run the service with:
 
-    $ docker compose up
+    docker compose up
 
 This will start the Reconciliation service on the port specified with `APP_PORT_EXPOSED` in `.env`. 
 
