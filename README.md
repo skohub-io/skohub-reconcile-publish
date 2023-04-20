@@ -22,23 +22,29 @@ Development:
 Running the Service:
 - docker
 
+### Environment Variables
+
 To run the service, you need to have a `.env` file in the root directory of the project.
 You can use the provided `.sample.env` as a template.
 Run `cp .sample.env .env` to create the environment file.
 
-    APP_PORT=3030 # port on which the service is running
-    ES_PROTO=http # protocol of the elasticsearch instance
-    ES_HOST=localhost # host of the elasticsearch instance
-    ES_PORT=9200  # port of the elasticsearch instance
-    ES_USERNAME= # username for the elasticsearch instance
-    ES_PASSWORD= # password for the elasticsearch instance
-    ES_INDEX=skohub-reconcile # index name for the elasticsearch instance
+### Network
+
+The service uses an external network to communicate with the [SkoHub Reconcile](https://github.com/skohub-io/skohub-reconcile) module.
+
+Before you start the service make sure the network `reconcile-backend` exists.
+You can create it with:
+
+    $ docker network create reconcile-backend
+
+### Run the Service
+
 
 Then, you can run the service with:
 
     $ docker compose up
 
-This will start the Reconciliation service on the port specified with `APP_PORT` in `.env`. 
+This will start the Reconciliation service on the port specified with `APP_PORT_EXPOSED` in `.env`. 
 
 ## Development
 
