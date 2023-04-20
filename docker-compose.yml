@@ -1,4 +1,4 @@
-version: "2.2"
+version: "3"
 
 services:
   reconcile-publish:
@@ -6,7 +6,15 @@ services:
       context: .
       dockerfile: ./Dockerfile
     ports:
-      - ${APP_PORT}:${APP_PORT}
+      - ${APP_PORT_EXPOSED}:${APP_PORT}
     volumes:
       - .env:/app/.env
       - ./uploads:/app/uploads
+    networks:
+      - reconcile-backend
+
+
+networks:
+  reconcile-backend:
+    name: reconcile-backend
+    external: true
