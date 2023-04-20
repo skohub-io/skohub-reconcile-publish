@@ -1,26 +1,13 @@
-import { Client } from "@elastic/elasticsearch";
 import crypto from "crypto";
 import esb from "elastic-builder";
 import fs from "fs";
 import path from "path";
-import { config } from "./config.js";
-import { buildJSON } from "./buildJSON.js";
+import { config } from "../config.js";
+import { buildJSON } from "../buildJSON.js";
+import { esClient } from "../elastic/connect.js";
 
 const esIndex = config.es_index;
 
-const setupEsClient = () => {
-  if (config.es_user && config.es_pass) {
-    return new Client({
-      node: `${config.es_proto}://${config.es_user}:${config.es_pass}@${config.es_host}:${config.es_port}`,
-    });
-  } else {
-    return new Client({
-      node: `${config.es_proto}://${config.es_host}:${config.es_port}`,
-    });
-  }
-};
-
-const esClient = setupEsClient();
 
 async function collectData(filePath, log) {
   var data = [];
