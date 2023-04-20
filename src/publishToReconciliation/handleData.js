@@ -2,14 +2,20 @@ import crypto from "crypto";
 import esb from "elastic-builder";
 import fs from "fs";
 import path from "path";
-import { config } from "../config.js";
 import { buildJSON } from "../buildJSON.js";
 import { esClient } from "../elastic/connect.js";
+import { writeLog } from "./writeLog.js";
+import { config } from "../config.js";
 
 const esIndex = config.es_index;
 
+const hashID = (id) => {
+  const hash = crypto.createHash("sha256");
+  hash.update(id);
+  return hash.digest("hex");
+};
 
-async function collectData(filePath, log) {
+export const collectData = async (filePath, log) => {
   var data = [];
   const account = path.basename(path.dirname(filePath));
   console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
@@ -31,10 +37,12 @@ async function collectData(filePath, log) {
   writeLog(log);
   data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
   return data;
-}
+};
 
-async function deleteData(account, dataset) {
-  console.log(`Delete data for account: ${account} and dataset: ${dataset} ...`)
+export const deleteData = async (account, dataset) => {
+  console.log(
+    `Delete data for account: ${account} and dataset: ${dataset} ...`
+  );
   const requestBody = esb
     .requestBodySearch()
     .query(
@@ -50,15 +58,9 @@ async function deleteData(account, dataset) {
     refresh: true,
     body: requestBody.toJSON(),
   });
-}
+};
 
-function hashID(id) {
-  const hash = crypto.createHash("sha256");
-  hash.update(id);
-  return hash.digest("hex");
-}
-
-async function sendData(entries) {
+export const sendData = async (entries) => {
   const operations = entries.flatMap((doc) => [
     {
       index: {
@@ -96,66 +98,4 @@ async function sendData(entries) {
   }
 
   return bulkResponse;
-}
-
-function writeLog(log) {
-  fs.writeFileSync(`public/log/${log.id}.json`, JSON.stringify(log));
-}
-
-async function process(filePath, log) {
-  const data = await collectData(filePath, log);
-  for await (const v of data) {
-    try {
-      // delete old data
-      const responseDeleted = await deleteData(v.account, v.dataset);
-      // if failures occured, log them
-      if (responseDeleted.failures.length > 0) {
-        console.log(
-          `> Warning: DeleteData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-          responseDeleted
-        )}
-      console.log(`> ${v.account}/${v.dataset}: Successfully deleted ${responseDeleted.deleted} documents from ES index.`)
-      const response = await sendData(v.entries);
-      if (response.errors) {
-        console.log(
-          `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-          response
-        );
-      } else {
-        console.log(
-          `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
-        );
-        // TODO improve this
-        log.account = v.account;
-        log.dataset = v.dataset;
-        log.status = "success";
-        log.reconcile_service_url = config.reconcile_service_url;
-        writeLog(log);
-      }
-    } catch (error) {
-      console.error(
-        `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
-        error
-      );
-      throw new Error("did not work");
-    }
-  }
-  return;
-}
-
-export const populateReconciliation = (filePath, id) => {
-  const log = {
-    id: id,
-    status: "processing",
-    log: [],
-  };
-  writeLog(log);
-  return new Promise((resolve, reject) => {
-    try {
-      resolve(process(filePath, log));
-    } catch (error) {
-      console.log("rejected");
-      reject(error);
-    }
-  });
-}
+};

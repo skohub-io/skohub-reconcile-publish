@@ -1,7 +1,7 @@
 import express from "express";
 import multer from "multer";
 import fs from "fs";
-import { populateReconciliation } from "./publishToReconciliation/populateReconciliation.js";
+import { publishToReconciliation } from "./publishToReconciliation/index.js";
 import { config } from "./config.js";
 
 const app = express();
@@ -34,10 +34,6 @@ app.get("/", (req, res) => {
   res.sendFile("index.html");
 });
 
-app.get("/processing", (req, res) => {
-  res.sendFile("processing.html", { root: "./public" });
-});
-
 app.post(
   "/upload",
   upload.single("uploaded_file"),
@@ -45,7 +41,7 @@ app.post(
     try {
       const filePath = req.file.path;
       const id = req.body.id;
-      await populateReconciliation(filePath, id);
+      await publishToReconciliation(filePath, id);
       res.redirect("/" + "?id=" + id);
     } catch (error) {
       next(error);
