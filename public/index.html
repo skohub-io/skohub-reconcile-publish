@@ -107,7 +107,7 @@
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
 
-  const buildReconcileUrl = (account, dataset) => `http://localhost:3000/_reconcile?language=en&account=${account}&dataset=${dataset}`
+  const buildReconcileUrl = (serviceUrl, account, dataset) => `${serviceUrl}_reconcile?language=en&account=${account}&dataset=${dataset}`
 
   id.value = crypto.randomUUID()
 
@@ -152,7 +152,7 @@
     } else {
       spinner.style.display = "none"
       checkmark.classList.remove("hidden")
-      reconcileUrl = buildReconcileUrl(data.account, data.dataset)
+      reconcileUrl = buildReconcileUrl(data.reconcile_service_url, data.account, data.dataset)
       reconcileUrlLink = document.createElement("a")
       reconcileUrlLink.setAttribute("href", reconcileUrl)
       reconcileUrlLink.setAttribute("target", "_blank")
