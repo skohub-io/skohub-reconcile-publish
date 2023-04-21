@@ -7,8 +7,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon --delay 500ms src/index.js localhost 3030",
-    "reset": "node esInitIndex.js",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
+    "test": "vitest"
   },
   "keywords": [
     "skohub",

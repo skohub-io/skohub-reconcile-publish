@@ -6,6 +6,12 @@ import { config } from "./config.js";
 
 const app = express();
 
+// check if uploads directory exists and create it if not
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+  console.log("Directory 'uploads' created successfully!");
+}
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     const accountDir = req.body.account;
@@ -28,6 +34,7 @@ const fileFilter = (req, file, cb) => {
 };
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
+
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
@@ -57,6 +64,18 @@ app.use((error, req, res, next) => {
       .status(400)
       .send(
         "File type not supported. Please just upload a turtle file. <a href='/'>Go back</a>"
+      );
+  } else if (error.name === "parseFileError") {
+    res
+      .status(500)
+      .send(
+        `Something went wrong while parsing your data: ${error.error}. <a href='/'>Go back</a>`
+      );
+  } else if (error.name === "HandleDataError") {
+    res
+      .status(500)
+      .send(
+        "Something went wrong while processing the data. Please check the logs. <a href='/'>Go back</a>"
       );
   } else {
     console.log("Path: ", req.path);

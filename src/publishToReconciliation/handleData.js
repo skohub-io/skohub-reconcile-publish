@@ -15,28 +15,38 @@ const hashID = (id) => {
   return hash.digest("hex");
 };
 
-export const collectData = async (filePath, log) => {
-  var data = [];
-  const account = path.basename(path.dirname(filePath));
-  console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
-  if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
-    console.log(
-      `> Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`
-    );
+function parseFileError(message, error) {
+  this.message = message;
+  this.error = error;
+  this.name = "parseFileError";
+}
+
+export const parseFile = async (filePath, log) => {
+  try {
+    var data = [];
+    const account = path.basename(path.dirname(filePath));
+    console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
+    if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
+      console.log(
+        `> Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`
+      );
+    }
+    const ttlString = await fs.readFileSync(filePath).toString();
+    const j = await buildJSON(ttlString.toString(), account);
+    if (!/[a-zA-Z0-9]/.test(j.dataset.slice(0, 1))) {
+      console.log(
+        `> Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`
+      );
+    }
+    log.status = "processing";
+    log.account = account;
+    log.dataset = j.dataset;
+    writeLog(log);
+    data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
+    return data;
+  } catch (error) {
+    throw new parseFileError(`Failed to collect data from ${filePath}. Abort!`, error);
   }
-  const ttlString = await fs.readFileSync(filePath).toString();
-  const j = await buildJSON(ttlString.toString(), account);
-  if (!/[a-zA-Z0-9]/.test(j.dataset.slice(0, 1))) {
-    console.log(
-      `> Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`
-    );
-  }
-  log.status = "processing";
-  log.account = account;
-  log.dataset = j.dataset;
-  writeLog(log);
-  data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
-  return data;
 };
 
 export const deleteData = async (account, dataset) => {

@@ -1,49 +1,75 @@
-import { collectData, sendData, deleteData } from "./handleData.js";
+import { parseFile, sendData, deleteData } from "./handleData.js";
 import { writeLog } from "./writeLog.js";
 import { config } from "../config.js";
 
 const esIndex = config.es_index;
 
+function HandleDataError(message, error, account, dataset) {
+  this.message = message;
+  this.error = error;
+  this.name = "HandleDataError";
+  this.account = account;
+  this.dataset = dataset;
+}
+
 export const process = async (filePath, log) => {
-  const data = await collectData(filePath, log);
-  for await (const v of data) {
-    try {
+  try {
+    const data = await parseFile(filePath, log);
+    for await (const v of data) {
       // delete old data
       const responseDeleted = await deleteData(v.account, v.dataset);
-      // if failures occured, log them
       if (responseDeleted.failures.length > 0) {
-        console.log(
-          `> Warning: DeleteData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-          responseDeleted
+        throw new HandleDataError(
+          `Warning: DeleteData ${v.account}/${v.dataset} had failures. Better check response:\n`,
+          responseDeleted,
+          v.account,
+          v.dataset
         );
       }
       console.log(
-        `> ${v.account}/${v.dataset}: Successfully deleted ${responseDeleted.deleted} documents from ES index.`
+        `${v.account}/${v.dataset}: Successfully deleted ${responseDeleted.deleted} documents from ES index.`
       );
-      const response = await sendData(v.entries);
-      if (response.errors) {
-        console.log(
-          `> Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
-          response
+
+      // send new data
+      const responseSend = await sendData(v.entries);
+      if (responseSend.errors) {
+        throw new HandleDataError(
+          `Warning: SendData ${v.account}/${v.dataset} had failures. Better check response:\n`,
+          responseSend,
+          v.account,
+          v.dataset
         );
-      } else {
-        console.log(
-          `> ${v.account}/${v.dataset}: Successfully sent ${response.items.length} documents to ES index.`
-        );
-        // TODO improve this
-        log.account = v.account;
-        log.dataset = v.dataset;
-        log.status = "success";
-        log.reconcile_service_url = config.reconcile_service_url;
-        writeLog(log);
       }
-    } catch (error) {
+      console.log(
+        `> ${v.account}/${v.dataset}: Successfully sent ${responseSend.items.length} documents to ES index.`
+      );
+      // TODO improve this
+      log.account = v.account;
+      log.dataset = v.dataset;
+      log.status = "success";
+      log.reconcile_service_url = config.reconcile_service_url;
+      writeLog(log);
+    }
+  } catch (error) {
+    if (error.name === "HandleDataError") {
       console.error(
-        `Failed populating ${esIndex} index of ES server with account: ${v.account} and dataset: ${v.dataset}. Abort!`,
+        `Failed populating ${esIndex} index of ES server with account: ${error.account} and dataset: ${error.dataset}. Abort!`,
         error
       );
-      throw new Error("did not work");
+      log.account = error.account;
+      log.dataset = error.dataset;
+      log.error = error.error
+      log.status = "failed";
+      writeLog(log);
+    } else {
+      console.error(
+        `Failed populating ${esIndex} index of ES server Abort!`, error
+      );
+      log.status = "failed";
+      log.error = error.error
+      writeLog(log);
     }
+    throw error;
   }
   return;
 };
