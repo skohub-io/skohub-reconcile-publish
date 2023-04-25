@@ -89,8 +89,11 @@ app.use((error, req, res, next) => {
       );
   }
    else {
-    console.log("Path: ", req.path);
-    res.redirect("/");
+    res
+      .status(500)
+      .send(
+        "Something went wrong. Please ask your favorite admin to check the logs. <a href='/'>Go back</a>"
+      );
   }
 });
 
