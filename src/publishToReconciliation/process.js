@@ -66,7 +66,7 @@ export const process = async (filePath, log) => {
         `Failed populating ${esIndex} index of ES server Abort!`, error
       );
       log.status = "failed";
-      log.error = error.error
+      log.error = error.error || error.message;
       writeLog(log);
     }
     throw error;

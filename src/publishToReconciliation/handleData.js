@@ -22,9 +22,9 @@ function parseFileError(message, error) {
 }
 
 export const parseFile = async (filePath, log) => {
+  var data = [];
+  const account = path.basename(path.dirname(filePath));
   try {
-    var data = [];
-    const account = path.basename(path.dirname(filePath));
     console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
     if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
       console.log(
@@ -51,6 +51,13 @@ export const parseFile = async (filePath, log) => {
         error
       );
     } else if (error.name === "NoPrefNamespaceUriError") {
+      writeLog({
+        id: log.id,
+        account: account,
+        status: "error",
+        error: error.message,
+      })
+      throw error;
     }
     throw error;
   }
