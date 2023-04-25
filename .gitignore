@@ -4,3 +4,9 @@ uploads/**/*
 
 # Editor Stuff
 .vscode/launch.json
+
+# Test stuff
+coverage
+
+# Test data
+__test_data__
