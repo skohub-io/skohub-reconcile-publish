@@ -3,11 +3,16 @@ import jsonld from "jsonld";
 import { context } from "./context.js";
 
 
+function NoPrefNamespaceUriError(message) {
+  this.message = message;
+  this.name = "NoPrefNamespaceUriError";
+}
+
 export const buildJSON = async (ttlString, account) => {
   const doc = ttl2jsonld.parse(ttlString);
   const expanded = await jsonld.expand(doc);
   const compacted = await jsonld.compact(expanded, context);
-  // TODO get all available languages and stor them as attribute for Concept Scheme
+  // TODO get all available languages and store them as attribute for Concept Scheme
   var entries = [];
   var dataset = "";
 
@@ -22,6 +27,11 @@ export const buildJSON = async (ttlString, account) => {
     };
     if (node.type === "ConceptScheme") {
       dataset = node.id;
+      if (!node.hasOwnProperty("preferredNamespaceUri")) {
+        throw new NoPrefNamespaceUriError(
+          `ConceptScheme ${node.id} does not have a preferredNamespaceUri`
+        );
+      }
       if (typeof node.preferredNamespaceUri === "string") {
         const id = node.preferredNamespaceUri;
         node.preferredNamespaceUri = { id };

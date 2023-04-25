@@ -45,7 +45,14 @@ export const parseFile = async (filePath, log) => {
     data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
     return data;
   } catch (error) {
-    throw new parseFileError(`Failed to collect data from ${filePath}. Abort!`, error);
+    if (error.name === "parseFileError") {
+      throw new parseFileError(
+        `Failed to collect data from ${filePath}. Abort!`,
+        error
+      );
+    } else if (error.name === "NoPrefNamespaceUriError") {
+    }
+    throw error;
   }
 };
 

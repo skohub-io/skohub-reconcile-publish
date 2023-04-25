@@ -55,6 +55,4 @@ describe("process", () => {
     await expect(() => process("filePath", {})).rejects.toThrowError();
     expect(writeLog).toHaveBeenCalled()
   });
-
-  
 });

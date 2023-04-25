@@ -71,5 +71,5 @@ export const process = async (filePath, log) => {
     }
     throw error;
   }
-  return;
+  return true;
 };
