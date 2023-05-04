@@ -37,7 +37,9 @@
             <div class="form-group">
               <label for="account">Account for Dataset
               </label>
-              <input type="text" id="account" name="account" />
+              <input type="text" id="account" name="account" required />
+              <label for="language">Language of Dataset</label>
+              <input type="text" id="language" name="language" required placeholder="e.g. de" />
               <label for="file_upload">
                 Please select a file to upload (.ttl)
               </label>
@@ -47,20 +49,20 @@
             </div>
           </form>
         </div>
-          <div id="result">
-            <div id="spinner" class="lds-ring">
-              <div></div>
-              <div></div>
-              <div></div>
-              <div></div>
-            </div>
-            <div id="checkmark" class="hidden">
-              <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
-                <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
-                <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
-              </svg>
-            </div>
+        <div id="result">
+          <div id="spinner" class="lds-ring">
+            <div></div>
+            <div></div>
+            <div></div>
+            <div></div>
           </div>
+          <div id="checkmark" class="hidden">
+            <svg class="checkmark" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 52">
+              <circle class="checkmark__circle" cx="26" cy="26" r="25" fill="none" />
+              <path class="checkmark__check" fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8" />
+            </svg>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -97,6 +99,7 @@
 <script>
   const uploadForm = document.querySelector(".uploadForm")
   const account = document.querySelector("#account")
+  const language = document.querySelector("#language")
   const file_upload = document.querySelector("#file_upload")
   const id = document.querySelector("#id")
   const submit = document.querySelector("input[type=submit]")
@@ -107,19 +110,37 @@
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
 
-  const buildReconcileUrl = (serviceUrl, account, dataset) => `${serviceUrl}/_reconcile?language=en&account=${account}&dataset=${dataset}`
+  const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/_reconcile?language=${language}&account=${account}&dataset=${dataset}`
 
   id.value = crypto.randomUUID()
 
   function disableSubmit() {
-    if (account.value.length > 0 && file_upload.value.length > 0) {
+    if (account.value.length > 0 && language.value.length > 0 && file_upload.value.length > 0) {
       submit.removeAttribute("disabled")
     } else {
       submit.setAttribute("disabled", "disabled")
     }
   }
 
+  function validateInput() {
+    const input = document.getElementById("language");
+    const value = input.value;
+    const pattern = /^[a-zA-Z]{2}$/; // regular expression to match only a-z and A-Z
+
+    if (!pattern.test(value)) {
+      input.setCustomValidity("Invalid input. Only letters (a-z) and two characters are allowed.");
+    } else {
+      input.setCustomValidity("");
+    }
+    input.reportValidity();
+  }
+
   account.addEventListener("input", (e) => {
+    disableSubmit()
+  })
+
+  language.addEventListener("input", (e) => {
+    validateInput()
     disableSubmit()
   })
 
@@ -152,7 +173,7 @@
     } else {
       spinner.style.display = "none"
       checkmark.classList.remove("hidden")
-      reconcileUrl = buildReconcileUrl(data.reconcile_service_url, data.account, data.dataset)
+      reconcileUrl = buildReconcileUrl(data.reconcile_service_url, data.account, data.dataset, data.language)
       reconcileUrlLink = document.createElement("a")
       reconcileUrlLink.setAttribute("href", reconcileUrl)
       reconcileUrlLink.setAttribute("target", "_blank")

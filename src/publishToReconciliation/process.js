@@ -12,7 +12,7 @@ function HandleDataError(message, error, account, dataset) {
   this.dataset = dataset;
 }
 
-export const process = async (filePath, log) => {
+export const process = async (filePath, log, language) => {
   try {
     const data = await parseFile(filePath, log);
     for await (const v of data) {
@@ -46,6 +46,7 @@ export const process = async (filePath, log) => {
       // TODO improve this
       log.account = v.account;
       log.dataset = v.dataset;
+      log.language = language
       log.status = "success";
       log.reconcile_service_url = config.reconcile_service_url;
       writeLog(log);

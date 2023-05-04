@@ -13,7 +13,7 @@ if (!fs.existsSync("uploads")) {
 }
 
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: function(req, file, cb) {
     const accountDir = req.body.account;
     if (!fs.existsSync("uploads/" + accountDir)) {
       fs.mkdirSync("uploads/" + accountDir);
@@ -21,7 +21,7 @@ const storage = multer.diskStorage({
     }
     cb(null, "uploads" + "/" + accountDir);
   },
-  filename: function (req, file, cb) {
+  filename: function(req, file, cb) {
     cb(null, file.originalname);
   },
 });
@@ -44,11 +44,12 @@ app.get("/", (req, res) => {
 app.post(
   "/upload",
   upload.single("uploaded_file"),
-  async function (req, res, next) {
+  async function(req, res, next) {
     try {
       const filePath = req.file.path;
       const id = req.body.id;
-      await publishToReconciliation(filePath, id);
+      const language = req.body.language
+      await publishToReconciliation(filePath, id, language);
       res.redirect("/" + "?id=" + id);
     } catch (error) {
       next(error);
@@ -88,7 +89,7 @@ app.use((error, req, res, next) => {
       <a href='/'>Go back</a>`
       );
   }
-   else {
+  else {
     res
       .status(500)
       .send(
@@ -97,6 +98,6 @@ app.use((error, req, res, next) => {
   }
 });
 
-app.listen(config.app_port, function () {
+app.listen(config.app_port, function() {
   console.log(`App listening on port ${config.app_port_exposed}!`);
 });
