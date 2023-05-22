@@ -1,0 +1,40 @@
+@prefix ex: <http://example.org/> . 
+@prefix skos: <http://www.w3.org/2004/02/skos/core#>. 
+@prefix dct: <http://purl.org/dc/terms/> . 
+@prefix vann: <http://purl.org/vocab/vann/> .      # wichtig für Reconciliation
+
+ex: a skos:ConceptScheme ;
+	dct:title "Filmvokabular"@de ;
+	dct:license <http://creativecommons.org/publicationdomain/zero/1.0/> ;
+	skos:hasTopConcept ex:Genre ;
+	vann:preferredNamespaceUri ex: .          # wichtig für Reconciliation
+	
+ex:Genre skos:prefLabel "genre"@de ; 
+	a skos:Concept ;
+	skos:definition "Unter einem Filmgenre wird eine Gruppe von Filmen verstanden, die unter einem spezifischen Aspekt Gemeinsamkeiten aufweisen."@de ; 
+	skos:example "Horror"@de ;
+  skos:topConceptOf ex: ;
+	skos:narrower ex:Horror .
+
+ex:Horror  skos:prefLabel "Horror"@de, "thriller"@en ;
+	a skos:Concept ;
+	skos:inScheme ex: ;
+	skos:definition "Der Horrorfilm (veraltet auch Gruselfilm) ist ein klassisches Kino-Genre, das sich auf Horrorfiktion stützt und somit darauf abzielt, seine Zuschauer durch die Erzeugung von Angstlust zu unterhalten."@de ;
+	dct:title "Der Exorzist"@de, "The Exorcist"@en ;
+	skos:broader ex:Genre.
+
+ex:Liebe skos:prefLabel "Liebe"@de,  "Love"@en ;
+	a skos:Concept ;
+  skos:inScheme ex: ;
+	skos:broader ex:Genre .
+	
+	
+ex:Drama skos:prefLabel "Drama"@de, "Drama"@en ;
+	skos:definition "Schauspiel, in dem ein tragischer Konflikt dargestellt wird"@de, "Play showing a tragical conflict"@en  ;
+	a skos:Concept ; 
+  skos:inScheme ex: ;
+	skos:broader ex:Genre .
+	
+	
+	
+	
