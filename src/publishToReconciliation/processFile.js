@@ -12,7 +12,7 @@ function HandleDataError(message, error, account, dataset) {
   this.dataset = dataset;
 }
 
-export const process = async (filePath, log, language) => {
+export const processFile = async (filePath, log, language) => {
   try {
     const data = await parseFile(filePath, log);
     for await (const v of data) {

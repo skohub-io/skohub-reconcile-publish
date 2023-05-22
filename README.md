@@ -9,12 +9,16 @@ Uploaded files are stored in an `uploads` folder.
 You can also upload files to the service using `curl`.
 To do so, you have to provide the following parameters:
 
-- account: the account name for the SkoHub Reconcile Service
-- id: this is used for logging out the upload status and should be unique (try `uuidgen` for a unique id)
+- `account`: the account name for the SkoHub Reconcile Service
+- `id`: this is used for logging out the upload status and should be unique (try `uuidgen` for a unique id)
+- `uploaded_file`: the path to your uploaded file. Notice the `@` sign. The @ symbol in curl is used to specify a file upload in a multipart/form-data request.
+
+Also the order matters. 
+So please always start with `account` and `id`.
 
 Example:
 
-    curl -F uploaded_file=@./uploads/dini-ag-kim/hcrt.ttl -F account=test -F id=123 http://localhost:3030/upload
+    curl -F account=test -F id=123 -F uploaded_file=@./uploads/dini-ag-kim/hcrt.ttl http://localhost:3030/upload
 
 ## Setup
 

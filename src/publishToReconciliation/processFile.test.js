@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { process } from "./process.js";
+import { processFile } from "./processFile.js";
 import * as handleData from "./handleData.js";
 import { writeLog } from "./writeLog.js";
 
@@ -20,7 +20,7 @@ vi.mock("./writeLog.js", () => {
 const mockedHandleData = vi.mocked(handleData);
 const mockedLog = vi.mocked(writeLog);
 
-describe("process", () => {
+describe("processFile", () => {
   beforeEach(() => {
     mockedHandleData.parseFile.mockReset();
     mockedHandleData.sendData.mockReset();
@@ -28,7 +28,7 @@ describe("process", () => {
   });
   it("throws error if file parsing fails", async () => {
     mockedHandleData.parseFile.mockRejectedValueOnce(new Error("error"));
-    await expect(() => process("filePath", {})).rejects.toThrowError(/error/i);
+    await expect(() => processFile("filePath", {})).rejects.toThrowError(/error/i);
     expect(writeLog).toHaveBeenCalled()
   })
 
@@ -40,7 +40,7 @@ describe("process", () => {
     mockedHandleData.deleteData.mockResolvedValueOnce({
       failures: ["failure"],
     });
-    await expect(() => process("filePath", {})).rejects.toThrowError(
+    await expect(() => processFile("filePath", {})).rejects.toThrowError(
       /deleteData/i
     );
     expect(writeLog).toHaveBeenCalled()
@@ -52,7 +52,7 @@ describe("process", () => {
       { account: "account", dataset: "dataset", entries: [] },
     ]);
     mockedHandleData.deleteData.mockResolvedValueOnce({});
-    await expect(() => process("filePath", {})).rejects.toThrowError();
+    await expect(() => processFile("filePath", {})).rejects.toThrowError();
     expect(writeLog).toHaveBeenCalled()
   });
 });

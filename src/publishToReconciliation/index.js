@@ -1,5 +1,5 @@
 import { writeLog } from "./writeLog.js";
-import { process } from "./process.js";
+import { processFile } from "./processFile.js";
 
 export const publishToReconciliation = (filePath, id, language) => {
   const log = {
@@ -10,7 +10,7 @@ export const publishToReconciliation = (filePath, id, language) => {
   writeLog(log);
   return new Promise((resolve, reject) => {
     try {
-      resolve(process(filePath, log, language));
+      resolve(processFile(filePath, log, language));
     } catch (error) {
       console.log("rejected");
       reject(error);

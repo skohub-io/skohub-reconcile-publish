@@ -26,14 +26,7 @@ const storage = multer.diskStorage({
   },
 });
 
-const fileFilter = (req, file, cb) => {
-  if (file.mimetype === "text/turtle") {
-    return cb(null, true);
-  }
-  return cb(new Error("File type not supported"));
-};
-
-const upload = multer({ storage: storage, fileFilter: fileFilter });
+const upload = multer({ storage: storage, });
 
 app.use(express.static("public"));
 
@@ -57,47 +50,61 @@ app.post(
   }
 );
 
+const showError = (error) => (
+  `
+      <br>
+      <details>
+      <summary>Error</summary>
+        <pre>
+        ${JSON.stringify(error, null, 2)}
+        </pre>
+      </details>
+`
+)
+
 app.use((error, req, res, next) => {
   console.log("Error Handling Middleware called");
   console.error(error);
-  if (error.message === "File type not supported") {
-    res
-      .status(400)
-      .send(
-        "File type not supported. Please just upload a turtle file. <a href='/'>Go back</a>"
-      );
-  } else if (error.name === "parseFileError") {
+  if (error.name === "parseFileError") {
     res
       .status(500)
-      .send(
-        `Something went wrong while parsing your data: ${error.error}. <a href='/'>Go back</a>`
+      .send(`
+        Something went wrong while parsing your data: ${error.error}. <a href='/'>Go back</a>
+        ${showError(error)}
+        `
       );
   } else if (error.name === "HandleDataError") {
     res
       .status(500)
-      .send(
-        "Something went wrong while processing the data. Please check the logs. <a href='/'>Go back</a>"
+      .send(`
+        Something went wrong while processing the data.Please check the logs. < a href = '/' > Go back</a >
+      ${showError(error)}
+    `
       );
   } else if (error.name === "NoPrefNamespaceUriError") {
     res
       .status(400)
       .send(`
-      Please provide a <a href="https://vocab.org/vann/#preferredNamespaceUri">preferredNamespaceURI</a> 
+      Please provide a < a href = "https://vocab.org/vann/#preferredNamespaceUri" > preferredNamespaceURI</a > 
       for your Concept Scheme.
-      See <a href="https://github.com/dini-ag-kim/hcrt/blob/84271e3e499c746e211f95297ba451cc547e89d1/hcrt.ttl#L12">here</a> for an example.
-      <br>  
-      <a href='/'>Go back</a>`
+      See < a href = "https://github.com/dini-ag-kim/hcrt/blob/84271e3e499c746e211f95297ba451cc547e89d1/hcrt.ttl#L12" > here</a > for an example.
+      < br >
+        <a href='/'>Go back</a>
+      ${showError(error)}
+    `
       );
   }
   else {
     res
       .status(500)
       .send(
-        "Something went wrong. Please ask your favorite admin to check the logs. <a href='/'>Go back</a>"
+        `Something went wrong.Please ask your favorite admin to check the logs. < a href = '/' > Go back</a >
+      ${showError(error)}
+    `
       );
   }
 });
 
 app.listen(config.app_port, function() {
-  console.log(`App listening on port ${config.app_port_exposed}!`);
+  console.log(`App listening on port ${config.app_port_exposed} !`);
 });
