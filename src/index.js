@@ -77,7 +77,7 @@ app.use((error, req, res, next) => {
     res
       .status(500)
       .send(`
-        Something went wrong while processing the data.Please check the logs. < a href = '/' > Go back</a >
+        Something went wrong while processing the data.Please check the logs. <a href='/'> Go back</a>
       ${showError(error)}
     `
       );
@@ -85,9 +85,9 @@ app.use((error, req, res, next) => {
     res
       .status(400)
       .send(`
-      Please provide a < a href = "https://vocab.org/vann/#preferredNamespaceUri" > preferredNamespaceURI</a > 
+      Please provide a <a href="https://vocab.org/vann/#preferredNamespaceUri"> preferredNamespaceURI</a> 
       for your Concept Scheme.
-      See < a href = "https://github.com/dini-ag-kim/hcrt/blob/84271e3e499c746e211f95297ba451cc547e89d1/hcrt.ttl#L12" > here</a > for an example.
+      See <a href="https://github.com/dini-ag-kim/hcrt/blob/84271e3e499c746e211f95297ba451cc547e89d1/hcrt.ttl#L12" > here</a> for an example.
       < br >
         <a href='/'>Go back</a>
       ${showError(error)}
@@ -98,7 +98,7 @@ app.use((error, req, res, next) => {
     res
       .status(500)
       .send(
-        `Something went wrong.Please ask your favorite admin to check the logs. < a href = '/' > Go back</a >
+        `Something went wrong.Please ask your favorite admin to check the logs. <a href='/' > Go back</a>
       ${showError(error)}
     `
       );
