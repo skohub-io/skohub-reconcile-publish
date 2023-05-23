@@ -64,7 +64,7 @@ export const buildJSON = async (ttlString, account) => {
       narrower,
       preferredNamespaceUri,
     };
-    console.log(node)
+
     if (node.type === "ConceptScheme") {
       dataset = node.id;
       if (!node.hasOwnProperty("preferredNamespaceUri")) {
