@@ -13,8 +13,8 @@ export const buildJSON = async (ttlString, account) => {
   const expanded = await jsonld.expand(doc);
   const compacted = await jsonld.compact(expanded, context);
   // TODO get all available languages and store them as attribute for Concept Scheme
-  var entries = [];
-  var dataset = "";
+  let entries = [];
+  let dataset = "";
 
   compacted["@graph"].forEach((graph, _) => {
     const { ...properties } = graph;
@@ -25,6 +25,12 @@ export const buildJSON = async (ttlString, account) => {
       ...properties,
       type,
     };
+    // FIXME? rdfs:label is causing problems in the prod instance
+    // since we are not using this attribute anywhere I delete it here
+    if (node.hasOwnProperty("label")) {
+      console.log(node.id, " has prop label, removing")
+      delete node.label
+    }
     if (node.type === "ConceptScheme") {
       dataset = node.id;
       if (!node.hasOwnProperty("preferredNamespaceUri")) {
