@@ -2,7 +2,6 @@ import ttl2jsonld from "@frogcat/ttl2jsonld";
 import jsonld from "jsonld";
 import { context } from "./context.js";
 
-
 function NoPrefNamespaceUriError(message) {
   this.message = message;
   this.name = "NoPrefNamespaceUriError";
@@ -21,16 +20,51 @@ export const buildJSON = async (ttlString, account) => {
     const type = Array.isArray(properties.type)
       ? properties.type.find((t) => ["Concept", "ConceptScheme"])
       : properties.type;
+
+    // only use properties we actually want to send to ES
+    const {
+      prefLabel,
+      altLabel,
+      hiddenLabel,
+      title,
+      description,
+      note,
+      scopeNote,
+      editorialNote,
+      historyNote,
+      changeNote,
+      definition,
+      example,
+      inScheme,
+      id,
+      notation,
+      broader,
+      narrower,
+      preferredNamespaceUri,
+    } = properties;
+
     const node = {
-      ...properties,
       type,
+      prefLabel,
+      altLabel,
+      hiddenLabel,
+      title,
+      description,
+      note,
+      scopeNote,
+      editorialNote,
+      historyNote,
+      changeNote,
+      definition,
+      example,
+      inScheme,
+      id,
+      notation,
+      broader,
+      narrower,
+      preferredNamespaceUri,
     };
-    // FIXME? rdfs:label is causing problems in the prod instance
-    // since we are not using this attribute anywhere I delete it here
-    if (node.hasOwnProperty("label")) {
-      console.log(node.id, " has prop label, removing")
-      delete node.label
-    }
+    console.log(node)
     if (node.type === "ConceptScheme") {
       dataset = node.id;
       if (!node.hasOwnProperty("preferredNamespaceUri")) {
@@ -56,4 +90,4 @@ export const buildJSON = async (ttlString, account) => {
     entries.push(node);
   });
   return { account: account, dataset: dataset, entries: entries };
-}
+};
