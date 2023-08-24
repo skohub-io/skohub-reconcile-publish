@@ -110,7 +110,7 @@
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
 
-  const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/_reconcile?language=${language}&account=${account}&dataset=${dataset}`
+  const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/reconcile?language=${language}&account=${account}&dataset=${dataset}`
 
   id.value = crypto.randomUUID()
 
