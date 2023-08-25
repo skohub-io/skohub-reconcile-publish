@@ -41,6 +41,7 @@ export const buildJSON = async (ttlString, account) => {
       broader,
       narrower,
       preferredNamespaceUri,
+      topConceptOf
     } = properties;
 
     const node = {
@@ -63,6 +64,7 @@ export const buildJSON = async (ttlString, account) => {
       broader,
       narrower,
       preferredNamespaceUri,
+      topConceptOf
     };
 
     if (node.type === "ConceptScheme") {
@@ -77,12 +79,19 @@ export const buildJSON = async (ttlString, account) => {
         node.preferredNamespaceUri = { id };
       }
     } else if (node.type === "Concept") {
-      dataset = node?.inScheme?.[0]?.id ?? node.topConceptOf[0].id;
+      if (node.topConceptOf) {
+        node.inScheme = node.topConceptOf;
+      }
+      try {
+
+        dataset = node?.inScheme?.[0]?.id ?? node.topConceptOf[0].id;
+      }
+      catch (e) {
+        console.error(e)
+        console.error(node)
+      }
     }
 
-    if (node.topConceptOf) {
-      node.inScheme = node.topConceptOf;
-    }
 
     node["dataset"] = dataset;
     node["account"] = account;
