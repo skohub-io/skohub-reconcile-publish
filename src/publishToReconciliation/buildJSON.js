@@ -69,7 +69,7 @@ export const buildJSON = async (ttlString, account) => {
 
     if (node.type === "ConceptScheme") {
       dataset = node.id;
-      if (!node.hasOwnProperty("preferredNamespaceUri")) {
+      if (node?.preferredNamespaceUri === undefined) {
         throw new NoPrefNamespaceUriError(
           `ConceptScheme ${node.id} does not have a preferredNamespaceUri`
         );
