@@ -4,6 +4,8 @@ ENV NODE_ENV production
 
 WORKDIR /app
 
+RUN mkdir uploads
+
 RUN chown -R node:node /app
 
 COPY --chown=node:node . .
