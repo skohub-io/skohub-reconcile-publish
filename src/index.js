@@ -39,10 +39,18 @@ app.post(
   upload.single("uploaded_file"),
   async function(req, res, next) {
     try {
-      const filePath = req.file.path;
+      const filePath = req?.file?.path;
+      const fileUrl = req.body.fileUrl;
+      const account = req.body.account;
       const id = req.body.id;
       const language = req.body.language
-      await publishToReconciliation(filePath, id, language);
+      await publishToReconciliation({
+        filePath,
+        fileUrl,
+        account,
+        id,
+        language
+      });
       res.redirect("/" + "?id=" + id);
     } catch (error) {
       next(error);
@@ -55,8 +63,9 @@ const showError = (error) => (
       <br>
       <details>
       <summary>Error</summary>
+        ${error.message}
         <pre>
-        ${JSON.stringify(error, null, 2)}
+        ${JSON.stringify(error, Object.getOwnPropertyNames(error), 2)}
         </pre>
       </details>
 `
@@ -77,7 +86,7 @@ app.use((error, req, res, next) => {
     res
       .status(500)
       .send(`
-        Something went wrong while processing the data.Please check the logs. <a href='/'> Go back</a>
+        Something went wrong while processing the data. Please check the logs. <a href='/'> Go back</a>
       ${showError(error)}
     `
       );
@@ -85,16 +94,17 @@ app.use((error, req, res, next) => {
     res
       .status(400)
       .send(`
-      Please provide a <a href="https://vocab.org/vann/#preferredNamespaceUri"> preferredNamespaceURI</a> 
+      <p>Please provide a <a href="https://vocab.org/vann/#preferredNamespaceUri"> preferredNamespaceURI</a> 
       for your Concept Scheme.
       See <a href="https://github.com/dini-ag-kim/hcrt/blob/84271e3e499c746e211f95297ba451cc547e89d1/hcrt.ttl#L12" > here</a> for an example.
-      < br >
+      </p>
         <a href='/'>Go back</a>
       ${showError(error)}
     `
       );
   }
   else {
+    console.log(error.message)
     res
       .status(500)
       .send(
