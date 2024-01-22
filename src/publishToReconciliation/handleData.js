@@ -36,7 +36,6 @@ async function getTurtleString(filePath, fileUrl) {
   } else if (fileUrl) {
     const response = await fetch(fileUrl)
     const ttlString = await response.text()
-    console.log(ttlString)
     return ttlString
   }
 }
@@ -49,7 +48,6 @@ export const parseFile = async (reconcileData, log) => {
   var data = [];
   const account = reconcileData.account;
   try {
-    console.log(`> Read and parse ${account}/${path.basename(reconcileData.filePath)} ...`);
     if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
       throw new IllegalCharacterError(`Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`)
     }
