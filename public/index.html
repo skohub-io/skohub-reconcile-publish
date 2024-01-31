@@ -197,6 +197,10 @@
       })
       result.appendChild(button)
 
+      // add a notice that the service is currently in alpha
+      const notice = document.createElement("p")
+      notice.innerHTML = "⚠️ Note: This service is currently in Alpha and may go offline or uploaded data might get lost."
+      result.appendChild(notice)
     }
   }
 
