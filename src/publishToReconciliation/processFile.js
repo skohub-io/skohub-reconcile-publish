@@ -1,6 +1,7 @@
 import { parseFile, sendData, deleteData } from "./handleData.js";
 import { writeLog } from "./writeLog.js";
 import { config } from "../config.js";
+import { ReconcileData } from "../types.js";
 
 const esIndex = config.es_index;
 
@@ -12,9 +13,13 @@ function HandleDataError(message, error, account, dataset) {
   this.dataset = dataset;
 }
 
-export const processFile = async (filePath, log, language) => {
+/**
+ * @param {ReconcileData} reconcileData
+ * @param {Object} log
+ */
+export const processFile = async (reconcileData, log) => {
   try {
-    const data = await parseFile(filePath, log);
+    const data = await parseFile(reconcileData, log);
     for await (const v of data) {
       // delete old data
       const responseDeleted = await deleteData(v.account, v.dataset);
@@ -46,7 +51,7 @@ export const processFile = async (filePath, log, language) => {
       // TODO improve this
       log.account = v.account;
       log.dataset = v.dataset;
-      log.language = language
+      log.language = reconcileData.language
       log.status = "success";
       log.reconcile_service_url = config.reconcile_service_url;
       writeLog(log);

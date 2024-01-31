@@ -45,6 +45,8 @@
               </label>
               <input type="file" id="file_upload" class="form-control-file" name="uploaded_file" />
               <input type="hidden" name="id" id="id" value="" />
+              <label for="fileUrl">...or provide link to Turtle File (<a href="https://raw.githubusercontent.com/dini-ag-kim/hochschulfaechersystematik/master/hochschulfaechersystematik.ttl">Example</a>)</label>
+              <input type="text" id="fileUrl" name="fileUrl" />
               <input disabled type="submit" value="Upload File to Reconcile Service!" class="btn btn-default" />
             </div>
           </form>
@@ -101,6 +103,7 @@
   const account = document.querySelector("#account")
   const language = document.querySelector("#language")
   const file_upload = document.querySelector("#file_upload")
+  const fileUrl = document.querySelector("#fileUrl")
   const id = document.querySelector("#id")
   const submit = document.querySelector("input[type=submit]")
   const spinner = document.querySelector("#spinner")
@@ -115,7 +118,7 @@
   id.value = crypto.randomUUID()
 
   function disableSubmit() {
-    if (account.value.length > 0 && language.value.length > 0 && file_upload.value.length > 0) {
+    if (account.value.length > 0 && language.value.length > 0 && (file_upload.value.length > 0 || fileUrl.value.length > 0)) {
       submit.removeAttribute("disabled")
     } else {
       submit.setAttribute("disabled", "disabled")
@@ -145,6 +148,10 @@
   })
 
   file_upload.addEventListener("input", (e) => {
+    disableSubmit()
+  })
+
+  fileUrl.addEventListener("input", (e) => {
     disableSubmit()
   })
 

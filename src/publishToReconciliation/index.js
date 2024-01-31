@@ -1,16 +1,20 @@
 import { writeLog } from "./writeLog.js";
 import { processFile } from "./processFile.js";
+import { ReconcileData } from "../types.js";
 
-export const publishToReconciliation = (filePath, id, language) => {
+/**
+  * @param {ReconcileData} reconcileData
+  */
+export const publishToReconciliation = (reconcileData) => {
   const log = {
-    id: id,
+    id: reconcileData.id,
     status: "processing",
     log: [],
   };
   writeLog(log);
   return new Promise((resolve, reject) => {
     try {
-      resolve(processFile(filePath, log, language));
+      resolve(processFile(reconcileData, log));
     } catch (error) {
       console.log("rejected");
       reject(error);

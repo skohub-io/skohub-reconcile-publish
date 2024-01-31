@@ -6,6 +6,7 @@ import { buildJSON } from "./buildJSON.js";
 import { esClient } from "../elastic/connect.js";
 import { writeLog } from "./writeLog.js";
 import { config } from "../config.js";
+import { ReconcileData } from "../types.js";
 
 const esIndex = config.es_index;
 
@@ -21,22 +22,39 @@ function parseFileError(message, error) {
   this.name = "parseFileError";
 }
 
-export const parseFile = async (filePath, log) => {
-  var data = [];
-  const account = path.basename(path.dirname(filePath));
-  try {
-    console.log(`> Read and parse ${account}/${path.basename(filePath)} ...`);
-    if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
-      console.log(
-        `> Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`
-      );
-    }
+export class IllegalCharacterError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "IllegalCharacterError"
+  }
+}
+
+async function getTurtleString(filePath, fileUrl) {
+  if (filePath) {
     const ttlString = await fs.readFileSync(filePath).toString();
+    return ttlString
+  } else if (fileUrl) {
+    const response = await fetch(fileUrl)
+    const ttlString = await response.text()
+    return ttlString
+  }
+}
+
+/**
+  * @param {ReconcileData} reconcileData
+  * @param {Object} log
+  */
+export const parseFile = async (reconcileData, log) => {
+  var data = [];
+  const account = reconcileData.account;
+  try {
+    if (!/[a-zA-Z0-9]/.test(account.slice(0, 1))) {
+      throw new IllegalCharacterError(`Invalid data: account must start with a letter or a number. Instead, its value is: ${account}`)
+    }
+    const ttlString = await getTurtleString(reconcileData.filePath, reconcileData.fileUrl);
     const j = await buildJSON(ttlString.toString(), account);
     if (!/[a-zA-Z0-9]/.test(j.dataset.slice(0, 1))) {
-      console.log(
-        `> Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`
-      );
+      throw new IllegalCharacterError(`Invalid data: dataset must start with a letter or a number. Instead, its value is: ${j.dataset}`)
     }
     log.status = "processing";
     log.account = account;
