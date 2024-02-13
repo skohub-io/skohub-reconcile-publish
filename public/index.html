@@ -30,7 +30,6 @@
       <section class="introduction">
         <h1>Unleash the full potential of controlled vocabularies in reconciliation</h1>
       </section>
-
       <section class="keyvisual-content">
         <div class="uploadForm">
           <form action="/upload" enctype="multipart/form-data" method="post">
@@ -68,6 +67,11 @@
             </svg>
           </div>
         </div>
+      </section>
+      <section class="keyvisual-content">
+        <p>Test out these URLs as examples in your favorite reconcile spec compliant service (click to copy):</p>
+          <input data-url="https://reconcile-test.skohub.io/reconcile?language=de&account=kim&dataset=https://w3id.org/kim/hochschulfaechersystematik/scheme" type="button" value="Hochschulfächersystematik (german)" class="btn example-url"/>
+          <input data-url="https://reconcile-test.skohub.io/reconcile?language=en&account=nalt-test&dataset=https://lod.nal.usda.gov/nalt-core" type="button" value="AgroVoc (english)" class="btn example-url" />
       </section>
 
     </main>
@@ -112,6 +116,8 @@
   const spinner = document.querySelector("#spinner")
   const checkmark = document.querySelector("#checkmark")
   const result = document.querySelector("#result")
+  const exampleUrlButton = document.querySelectorAll("input.btn.example-url")
+  console.log(exampleUrlButton)
 
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
@@ -126,6 +132,15 @@
     } else {
       submit.setAttribute("disabled", "disabled")
     }
+  }
+
+  function copyUrl(e) {
+    const url = e.target.dataset.url
+    navigator.clipboard.writeText(url).then(function() {
+      console.log('Copied!');
+    }, function() {
+      console.log('Copy error')
+    });
   }
 
   function validateInput() {
@@ -162,6 +177,9 @@
     spinner.style.display = "inline-block"
     getData()
   })
+
+  exampleUrlButton.forEach(b => b.addEventListener("click", copyUrl))
+
 
   const getData = async () => {
     try {
