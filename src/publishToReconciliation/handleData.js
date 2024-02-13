@@ -59,6 +59,7 @@ export const parseFile = async (reconcileData, log) => {
     log.status = "processing";
     log.account = account;
     log.dataset = j.dataset;
+    log.numOfEntries = j.entries.length;
     writeLog(log);
     data.push({ account: j.account, dataset: j.dataset, entries: j.entries });
     return data;

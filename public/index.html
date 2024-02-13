@@ -208,6 +208,13 @@
       reconcileUrlLink.innerHTML = reconcileUrl
       result.appendChild(reconcileUrlLink)
 
+      // show number of entries
+      if (data.numOfEntries) {
+        const numOfEntries = document.createElement("p")
+        numOfEntries.innerHTML = `ℹ️ Added a dataset with ${data.numOfEntries} entries.`
+        result.appendChild(numOfEntries)
+      }
+
       // add a button to return to root page saying "Add another dataset"
       const button = document.createElement("button")
       button.setAttribute("class", "btn")
