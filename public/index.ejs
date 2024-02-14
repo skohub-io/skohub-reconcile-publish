@@ -70,8 +70,9 @@
       </section>
       <section class="keyvisual-content">
         <p>Test out these URLs as examples in your favorite reconcile spec compliant service (click to copy):</p>
-          <input data-url="https://reconcile-test.skohub.io/reconcile?language=de&account=kim&dataset=https://w3id.org/kim/hochschulfaechersystematik/scheme" type="button" value="Hochschulfächersystematik (german)" class="btn example-url"/>
-          <input data-url="https://reconcile-test.skohub.io/reconcile?language=en&account=nalt-test&dataset=https://lod.nal.usda.gov/nalt-core" type="button" value="AgroVoc (english)" class="btn example-url" />
+        <input data-url="https://reconcile-test.skohub.io/reconcile?language=de&account=kim&dataset=https://w3id.org/kim/hochschulfaechersystematik/scheme" type="button" value="Hochschulfächersystematik (german)" class="btn example-url"/>
+        <input data-url="https://reconcile-test.skohub.io/reconcile?language=en&account=nalt-test&dataset=https://lod.nal.usda.gov/nalt-core" type="button" value="AgroVoc (english)" class="btn example-url" />
+          <p>or see <a href="<%= data.reconcileUrl %>/vocabs">all uploaded vocabularies</a>.</p>
       </section>
 
     </main>
@@ -117,7 +118,6 @@
   const checkmark = document.querySelector("#checkmark")
   const result = document.querySelector("#result")
   const exampleUrlButton = document.querySelectorAll("input.btn.example-url")
-  console.log(exampleUrlButton)
 
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")

@@ -5,7 +5,9 @@ import { publishToReconciliation } from "./publishToReconciliation/index.js";
 import { config } from "./config.js";
 
 const app = express();
-
+// Serve static files from the public directory
+app.set('view engine', 'ejs');
+app.set('views', './public');
 // check if uploads directory exists and create it if not
 if (!fs.existsSync("uploads")) {
   fs.mkdirSync("uploads");
@@ -31,7 +33,10 @@ const upload = multer({ storage: storage, });
 app.use(express.static("public"));
 
 app.get("/", (req, res) => {
-  res.sendFile("index.html");
+  const data = {
+    reconcileUrl: config.reconcile_service_url
+  }
+  res.render("index", { data });
 });
 
 app.post(
