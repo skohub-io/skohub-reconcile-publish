@@ -131,6 +131,12 @@ button {
   appearance: none;
 }
 
+button:hover {
+  background-color: var(--skohub-greendark);
+  outline-width: 0;
+}
+
+
 textarea {
   overflow: auto;
 }
@@ -775,3 +781,15 @@ Print Styles
     content: " (" attr(title) ")";
   }
 }
+
+.tooltip {
+  position: absolute;
+  background-color: #555;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 6px;
+  z-index: 1000;
+  display: none; /* Initially hidden */
+  cursor: pointer;
+}
+
