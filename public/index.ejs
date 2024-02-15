@@ -199,12 +199,12 @@
 
     // Position the tooltip above the button or wherever you prefer
     tooltip.style.left = btnRect.left + (btnRect.width / 2) - (tooltipWidth / 2) + "px";
-    tooltip.style.top = btnRect.top - tooltipHeight - 15 + "px"; // Adjust "5" for margin between button and tooltip
+    tooltip.style.top = btnRect.top + window.scrollY - 15 + "px"; // Adjust "5" for margin between button and tooltip
 
     // Show the tooltip
     tooltip.style.display = "block";
 
-    // Hide the tooltip after a few seconds or on another button click
+    // Hide the tooltip after a few seconds 
     setTimeout(function() {
       tooltip.style.display = "none";
       document.body.removeChild(tooltip); // Clean up by removing the tooltip from the DOM
