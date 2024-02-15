@@ -3,9 +3,10 @@
 
 # Except this file
 !.gitignore
-!index.html
+!index.ejs
 !processing.html
 !log/
 !img/
 !fonts/
 !css/
+!icons/

@@ -30,15 +30,17 @@
       <section class="introduction">
         <h1>Unleash the full potential of controlled vocabularies in reconciliation</h1>
       </section>
-
       <section class="keyvisual-content">
         <div class="uploadForm">
           <form action="/upload" enctype="multipart/form-data" method="post">
             <div class="form-group">
               <label for="account">Account for Dataset
+                  <a title="Please provide the same account for all your uploads. The account is part of the reconcile service url.">❓</a>
               </label>
               <input type="text" id="account" name="account" required />
-              <label for="language">Language to use for Reconciliation</label>
+              <label for="language">Language to use for Reconciliation
+                <a title="Reconciliation is done against a specific language. So tell us what language of your vocabulary we should use.">❓</a>
+                </label>
               <input type="text" id="language" name="language" required placeholder="e.g. de" />
               <label for="file_upload">
                 Please select a file to upload (.ttl)
@@ -65,6 +67,18 @@
             </svg>
           </div>
         </div>
+      </section>
+      <section class="keyvisual-content">
+        <p>Test out these URLs as examples in your favorite reconcile spec compliant service (click to copy):</p>
+          <button data-url="https://reconcile-test.skohub.io/reconcile?language=de&account=kim&dataset=https://w3id.org/kim/hochschulfaechersystematik/scheme" class="btn example-url" type="button">
+            Hochschulfächersystematik (german)
+            <img src="icons/copy.svg" alt="Copy" />
+          </button>
+          <button data-url="https://reconcile-test.skohub.io/reconcile?language=en&account=nalt-test&dataset=https://lod.nal.usda.gov/nalt-core" type="button" class="btn example-url">
+            AgroVoc (english)
+            <img src="icons/copy.svg" alt="Copy" />
+          </button>
+          <p>or see <a href="<%= data.reconcileUrl %>/vocabs">all uploaded vocabularies</a>.</p>
       </section>
 
     </main>
@@ -109,6 +123,7 @@
   const spinner = document.querySelector("#spinner")
   const checkmark = document.querySelector("#checkmark")
   const result = document.querySelector("#result")
+  const exampleUrlButton = document.querySelectorAll("button.btn.example-url")
 
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
@@ -123,6 +138,15 @@
     } else {
       submit.setAttribute("disabled", "disabled")
     }
+  }
+
+  function copyUrl(e) {
+    const url = e.target.dataset.url
+    navigator.clipboard.writeText(url).then(function() {
+      console.log('Copied!');
+    }, function() {
+      console.log('Copy error')
+    });
   }
 
   function validateInput() {
@@ -160,6 +184,34 @@
     getData()
   })
 
+  exampleUrlButton.forEach(b => b.addEventListener("click", (e) => {
+    copyUrl(e)
+    // Create tooltip element
+    var tooltip = document.createElement("div");
+    tooltip.innerHTML = "Copied!";
+    tooltip.className = "tooltip";
+    document.body.appendChild(tooltip);
+
+    // Calculate position for the tooltip. Adjust as needed.
+    var btnRect = b.getBoundingClientRect();
+    var tooltipWidth = tooltip.offsetWidth;
+    var tooltipHeight = tooltip.offsetHeight;
+
+    // Position the tooltip above the button or wherever you prefer
+    tooltip.style.left = btnRect.left + (btnRect.width / 2) - (tooltipWidth / 2) + "px";
+    tooltip.style.top = btnRect.top + window.scrollY - 15 + "px"; // Adjust "5" for margin between button and tooltip
+
+    // Show the tooltip
+    tooltip.style.display = "block";
+
+    // Hide the tooltip after a few seconds 
+    setTimeout(function() {
+      tooltip.style.display = "none";
+      document.body.removeChild(tooltip); // Clean up by removing the tooltip from the DOM
+    }, 1000);
+  }))
+
+
   const getData = async () => {
     try {
       const response = await fetch(`./log/${id.value}.json`)
@@ -187,6 +239,13 @@
       reconcileUrlLink.innerHTML = reconcileUrl
       result.appendChild(reconcileUrlLink)
 
+      // show number of entries
+      if (data.numOfEntries) {
+        const numOfEntries = document.createElement("p")
+        numOfEntries.innerHTML = `ℹ️ Added a dataset with ${data.numOfEntries} entries.`
+        result.appendChild(numOfEntries)
+      }
+
       // add a button to return to root page saying "Add another dataset"
       const button = document.createElement("button")
       button.setAttribute("class", "btn")
@@ -197,6 +256,10 @@
       })
       result.appendChild(button)
 
+      // add a notice that the service is currently in alpha
+      const notice = document.createElement("p")
+      notice.innerHTML = "⚠️ Note: This service is currently in Alpha and may go offline or uploaded data might get lost."
+      result.appendChild(notice)
     }
   }
 

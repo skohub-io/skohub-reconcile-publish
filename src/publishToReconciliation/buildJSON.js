@@ -13,7 +13,8 @@ export const buildJSON = async (ttlString, account) => {
   const compacted = await jsonld.compact(expanded, context);
   // TODO get all available languages and store them as attribute for Concept Scheme
   let entries = [];
-  let dataset = "";
+  const dataset = compacted["@graph"].find(g => g.type === "ConceptScheme").id;
+  console.log("found dataset", dataset)
 
   compacted["@graph"].forEach((graph, _) => {
     const { ...properties } = graph;
@@ -68,7 +69,6 @@ export const buildJSON = async (ttlString, account) => {
     };
 
     if (node.type === "ConceptScheme") {
-      dataset = node.id;
       if (node?.preferredNamespaceUri === undefined) {
         throw new NoPrefNamespaceUriError(
           `ConceptScheme ${node.id} does not have a preferredNamespaceUri`
@@ -82,16 +82,7 @@ export const buildJSON = async (ttlString, account) => {
       if (node.topConceptOf) {
         node.inScheme = node.topConceptOf;
       }
-      try {
-
-        dataset = node?.inScheme?.[0]?.id ?? node.topConceptOf[0].id;
-      }
-      catch (e) {
-        console.error(e)
-        console.error(node)
-      }
     }
-
 
     node["dataset"] = dataset;
     node["account"] = account;
