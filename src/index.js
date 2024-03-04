@@ -35,7 +35,7 @@ const upload = multer({ storage: storage, });
 
 app.use(express.static("public"));
 app.use(session({
-  secret: config.client_secret,
+  secret: config.session_secret,
   resave: false,
   saveUninitialized: true,
 }));

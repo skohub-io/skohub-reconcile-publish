@@ -21,6 +21,7 @@ export const config = {
   orcid_id: process.env.ORCID_ID,
   orcid_secret: process.env.ORCID_SECRET,
   contact_mail: process.env.CONTACT_MAIL,
+  session_secret: process.env.SESSION_SECRET,
 }
 
 if (result.error) {
