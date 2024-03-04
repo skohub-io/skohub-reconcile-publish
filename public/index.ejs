@@ -34,10 +34,19 @@
         <div class="uploadForm">
           <form action="/upload" enctype="multipart/form-data" method="post">
             <div class="form-group">
-              <label for="account">Account for Dataset
-                  <a title="Please provide the same account for all your uploads. The account is part of the reconcile service url.">❓</a>
-              </label>
-              <input type="text" id="account" name="account" required />
+              <label for="account">
+                  <% if(data?.user?.id){ %>
+                  <p>Logged in ✅</p>
+                  <% } else{ %>
+                    <span>Login with</span>
+                    <a href="/auth/mediawiki">Wikimedia</a> 
+                    <span>or</span>
+                    <a href="/auth/orcid">ORCID</a> 
+                    <span>to provide an account for your dataset</span>
+                    <a title="Please provide the same account for all your uploads. The account is part of the reconcile service url.">❓</a>
+                  <% } %>
+                  </label>
+
               <label for="language">Language to use for Reconciliation
                 <a title="Reconciliation is done against a specific language. So tell us what language of your vocabulary we should use.">❓</a>
                 </label>
@@ -114,7 +123,8 @@
 
 <script>
   const uploadForm = document.querySelector(".uploadForm")
-  const account = document.querySelector("#account")
+  const account = "<%=- JSON.stringify(data) %>"
+  const accountInput = document.querySelector("#account")
   const language = document.querySelector("#language")
   const file_upload = document.querySelector("#file_upload")
   const fileUrl = document.querySelector("#fileUrl")
@@ -130,10 +140,29 @@
 
   const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/reconcile?language=${language}&account=${account}&dataset=${dataset}`
 
-  id.value = crypto.randomUUID()
+  // crypto.randomUUID() is only available in https contextx or localhost / 127.0.0.1
+  // therefore I took this uuid function from https://stackoverflow.com/a/8809472
+  const generateUUID = () => {
+  let
+    d = new Date().getTime(),
+    d2 = ((typeof performance !== 'undefined') && performance.now && (performance.now() * 1000)) || 0;
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      let r = Math.random() * 16;
+      if (d > 0) {
+        r = (d + r) % 16 | 0;
+        d = Math.floor(d / 16);
+      } else {
+        r = (d2 + r) % 16 | 0;
+        d2 = Math.floor(d2 / 16);
+      }
+      return (c == 'x' ? r : (r & 0x7 | 0x8)).toString(16);
+    });
+  };
+
+  id.value = generateUUID()
 
   function disableSubmit() {
-    if (account.value.length > 0 && language.value.length > 0 && (file_upload.value.length > 0 || fileUrl.value.length > 0)) {
+    if (accountInput.value.length > 0 && language.value.length > 0 && (file_upload.value.length > 0 || fileUrl.value.length > 0)) {
       submit.removeAttribute("disabled")
     } else {
       submit.setAttribute("disabled", "disabled")
@@ -162,7 +191,7 @@
     input.reportValidity();
   }
 
-  account.addEventListener("input", (e) => {
+  accountInput.addEventListener("input", (e) => {
     disableSubmit()
   })
 
