@@ -49,7 +49,7 @@ passport.use("wikimedia", new OAuth2Strategy({
   tokenURL: config.wikimedia_token_url,
   clientID: config.wikimedia_id,
   clientSecret: config.wikimedia_secret,
-  callbackURL: `${config.reconcile_service_url}/wiki/callback`
+  callbackURL: `${config.publish_service_url}/wiki/callback`
 },
   function(accessToken, refreshToken, profile, cb) {
     const url = 'https://meta.wikimedia.org/w/api.php?action=query&meta=userinfo&format=json';
@@ -76,7 +76,7 @@ passport.use("orcid", new OAuth2Strategy({
   tokenURL: config.orcid_token_url,
   clientID: config.orcid_id,
   clientSecret: config.orcid_secret,
-  callbackURL: `${config.reconcile_service_url}/orcid/callback`
+  callbackURL: `${config.publish_service_url}/orcid/callback`
 },
   function(accessToken, refreshToken, profile, cb) {
     const url = config.orcid_getuser_url;

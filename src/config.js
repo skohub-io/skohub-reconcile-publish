@@ -11,6 +11,7 @@ export const config = {
   es_pass: process.env.ES_PASSWORD,
   es_index: process.env.ES_INDEX,
   reconcile_service_url: process.env.RECONCILE_SERVICE_URL,
+  publish_service_url: process.env.PUBLISH_SERVICE_URL,
   wikimedia_auth_url: process.env.WIKIMEDIA_AUTH_URL,
   wikimedia_token_url: process.env.WIKIMEDIA_TOKEN_URL,
   wikimedia_id: process.env.WIKIMEDIA_ID,
