@@ -34,7 +34,7 @@
         <div class="uploadForm">
           <form action="/upload" enctype="multipart/form-data" method="post">
             <div class="form-group">
-              <label for="account">
+              <label>
                   <% if(data?.user?.id){ %>
                   <p>Logged in ✅</p>
                   <% } else{ %>
@@ -124,7 +124,6 @@
 <script>
   const uploadForm = document.querySelector(".uploadForm")
   const account = "<%=- JSON.stringify(data) %>"
-  const accountInput = document.querySelector("#account")
   const language = document.querySelector("#language")
   const file_upload = document.querySelector("#file_upload")
   const fileUrl = document.querySelector("#fileUrl")
@@ -138,7 +137,7 @@
   const url = new URL(window.location.href)
   const idParam = url.searchParams.get("id")
 
-  const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/reconcile?language=${language}&account=${account}&dataset=${dataset}`
+  const buildReconcileUrl = (serviceUrl, account, dataset, language) => `${serviceUrl}/reconcile?language=${language}&account=${account.user.id}&dataset=${dataset}`
 
   // crypto.randomUUID() is only available in https contextx or localhost / 127.0.0.1
   // therefore I took this uuid function from https://stackoverflow.com/a/8809472
@@ -162,7 +161,7 @@
   id.value = generateUUID()
 
   function disableSubmit() {
-    if (accountInput.value.length > 0 && language.value.length > 0 && (file_upload.value.length > 0 || fileUrl.value.length > 0)) {
+    if (account?.user?.id && language.value.length > 0 && (file_upload.value.length > 0 || fileUrl.value.length > 0)) {
       submit.removeAttribute("disabled")
     } else {
       submit.setAttribute("disabled", "disabled")
@@ -190,10 +189,6 @@
     }
     input.reportValidity();
   }
-
-  accountInput.addEventListener("input", (e) => {
-    disableSubmit()
-  })
 
   language.addEventListener("input", (e) => {
     validateInput()
