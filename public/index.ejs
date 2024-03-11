@@ -36,12 +36,14 @@
             <div class="form-group">
               <label>
                   <% if(data?.user?.id){ %>
-                  <p>Logged in ✅</p>
+                  <p>Logged in ✅ (<a href="/logout">Logout</a>)</p>
                   <% } else{ %>
                     <span>Login with</span>
                     <a href="/auth/mediawiki">Wikimedia</a> 
+                    <img src="img/wikimedia.svg" alt="wikimedia" style="height: 1em; vertical-align: middle;">
                     <span>or</span>
                     <a href="/auth/orcid">ORCID</a> 
+                    <img src="img/orcid.svg" alt="orcid" style="height: 1em; vertical-align: middle;">
                     <span>to provide an account for your dataset</span>
                     <a title="Please provide the same account for all your uploads. The account is part of the reconcile service url.">❓</a>
                   <% } %>

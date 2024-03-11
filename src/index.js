@@ -137,6 +137,15 @@ app.get('/orcid/callback',
     res.redirect('/');
   });
 
+app.get('/logout',
+  function(req, res) {
+    const data = {
+      reconcileUrl: config.reconcile_service_url,
+      user: null
+    }
+    res.render("index", { data });
+  });
+
 app.post(
   "/upload",
   upload.single("uploaded_file"),
