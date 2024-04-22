@@ -63,7 +63,10 @@ passport.use("wikimedia", new OAuth2Strategy({
     fetch(url, options)
       .then(response => response.json())
       .then(({ query: { userinfo } }) => {
-        cb(null, { id: userinfo.id }
+        cb(null, {
+          id: userinfo.id,
+          authProvider: "wikimedia"
+        }
         )
       })
       .catch(error => console.error('Error fetching user info:', error));
@@ -92,7 +95,10 @@ passport.use("orcid", new OAuth2Strategy({
     fetch(url, options)
       .then(response => response.json())
       .then(data => {
-        cb(null, { id: data.sub }
+        cb(null, {
+          id: data.sub,
+          authProvider: "orcid"
+        }
         )
       })
       .catch(error => console.error('Error fetching user info:', error));
