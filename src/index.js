@@ -1,8 +1,11 @@
 import express from "express";
+import session from "express-session";
 import multer from "multer";
 import fs from "fs";
 import { publishToReconciliation } from "./publishToReconciliation/index.js";
 import { config } from "./config.js";
+import passport from "passport"
+import OAuth2Strategy from "passport-oauth2";
 
 const app = express();
 // Serve static files from the public directory
@@ -31,13 +34,123 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage, });
 
 app.use(express.static("public"));
+app.use(session({
+  secret: config.session_secret,
+  resave: false,
+  saveUninitialized: true,
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// wikimedia oauth
+passport.use("wikimedia", new OAuth2Strategy({
+  authorizationURL: config.wikimedia_auth_url,
+  tokenURL: config.wikimedia_token_url,
+  clientID: config.wikimedia_id,
+  clientSecret: config.wikimedia_secret,
+  callbackURL: `${config.publish_service_url}/wiki/callback`
+},
+  function(accessToken, refreshToken, profile, cb) {
+    const url = 'https://meta.wikimedia.org/w/api.php?action=query&meta=userinfo&format=json';
+    const options = {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'User-Agent': `SkoHub-Reconcile/1.0 (${config.contact_mail})`
+      }
+    };
+    fetch(url, options)
+      .then(response => response.json())
+      .then(({ query: { userinfo } }) => {
+        cb(null, {
+          id: userinfo.id,
+          authProvider: "wikimedia"
+        }
+        )
+      })
+      .catch(error => console.error('Error fetching user info:', error));
+  }
+));
+
+// orcid oauth
+passport.use("orcid", new OAuth2Strategy({
+  authorizationURL: config.orcid_auth_url,
+  tokenURL: config.orcid_token_url,
+  clientID: config.orcid_id,
+  clientSecret: config.orcid_secret,
+  callbackURL: `${config.publish_service_url}/orcid/callback`
+},
+  function(accessToken, refreshToken, profile, cb) {
+    const url = config.orcid_getuser_url;
+    const options = {
+      method: 'GET',
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${accessToken}`,
+        'User-Agent': `SkoHub-Reconcile/1.0 (${config.contact_mail})`
+      }
+    };
+
+    fetch(url, options)
+      .then(response => response.json())
+      .then(data => {
+        cb(null, {
+          id: data.sub,
+          authProvider: "orcid"
+        }
+        )
+      })
+      .catch(error => console.error('Error fetching user info:', error));
+  }
+));
+
+passport.serializeUser(async (user, done) => {
+  done(null, user);
+});
+
+passport.deserializeUser(async (user, done) => {
+  done(null, user);
+})
 
 app.get("/", (req, res) => {
   const data = {
-    reconcileUrl: config.reconcile_service_url
+    reconcileUrl: config.reconcile_service_url,
+    user: req.user
   }
   res.render("index", { data });
 });
+
+app.get('/auth/mediawiki',
+  passport.authenticate('wikimedia'));
+
+app.get('/wiki/callback',
+  passport.authenticate('wikimedia', { failureRedirect: '/' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/auth/orcid',
+  passport.authenticate('orcid', {
+    scope: ["openid"],
+    response_type: "code",
+    successRedirect: "/orcid/callback"
+  }));
+
+app.get('/orcid/callback',
+  passport.authenticate('orcid', { failureRedirect: '/' }),
+  function(req, res) {
+    res.redirect('/');
+  });
+
+app.get('/logout',
+  function(req, res) {
+    const data = {
+      reconcileUrl: config.reconcile_service_url,
+      user: null
+    }
+    res.render("index", { data });
+  });
 
 app.post(
   "/upload",
