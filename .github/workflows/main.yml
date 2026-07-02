@@ -18,7 +18,7 @@ jobs:
         node-version: ${{ matrix.node-version }}
     - run: echo Using node version $(node --version)
     - run: echo Using npm version $(npm --version)
-    - run: cp .env.sample .env
+    - run: cp .sample.env .env
 
     - name: Cache node modules
       id: cache-npm
