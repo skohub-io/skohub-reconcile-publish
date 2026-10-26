@@ -23,7 +23,7 @@ Example:
 ## Setup
 
 Development:
-  - node >= 18 (for development)
+  - node >= 22 (for development)
 
 Running the Service:
 - docker

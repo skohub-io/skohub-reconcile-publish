@@ -179,7 +179,7 @@
   }
 
   function copyUrl(e) {
-    const url = e.target.dataset.url
+    const url = e.currentTarget.dataset.url
     navigator.clipboard.writeText(url).then(function() {
       console.log('Copied!');
     }, function() {

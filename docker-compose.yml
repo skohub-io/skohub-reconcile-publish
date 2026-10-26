@@ -9,7 +9,7 @@ services:
       - ${APP_PORT_EXPOSED}:${APP_PORT}
     volumes:
       - .env:/app/.env
-      - ./public/log:/app/public/log
+      - public-log:/app/public/log
       - uploads:/app/uploads
     networks:
       - reconcile-backend
@@ -17,6 +17,8 @@ services:
 
 volumes:
   uploads:
+    driver: local
+  public-log:
     driver: local
 
 networks:
